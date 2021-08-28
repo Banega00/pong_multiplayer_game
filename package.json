@@ -4,8 +4,7 @@
   "description": "This project is part of University course called \"Computer Networks\", attended at 5th semester of Undergraduate studies at University of Belgrade, Faculty of Organizational Sciences.",
   "main": "index.js",
   "scripts": {
-    "start_client": "node ./client/app.js",
-    "start_server": "node ./server/app.js",
+    "dev": "nodemon --watch './**/*.ts' --exec ts-node app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +19,13 @@
   },
   "homepage": "https://github.com/Banega00/pong_multiplayer_game#readme",
   "dependencies": {
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "nodemon": "^2.0.12",
+    "ts-node": "^10.2.1"
   }
 }

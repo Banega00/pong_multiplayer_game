@@ -1,0 +1,42 @@
+*{
+    box-sizing: border-box;
+    margin:0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+header h1{
+    text-align: center;
+}
+
+.online-players-container{
+    background-color: black;
+    border-radius: 15px;
+    color:white;
+    height:400px;
+    width:40%;
+    padding: 5px;
+    padding-right: 10px;
+}
+
+.online-players-container h2{
+    display: flex;
+    align-items: center;
+}
+
+.green-circle{
+    margin-right:15px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: rgb(8, 255, 8);
+}
+
+.players-list{
+    margin-top:20px;
+}
+
+.players-list .player{
+    background-color: blue;
+    border-radius: 15px;
+    padding: 10px;
+}
