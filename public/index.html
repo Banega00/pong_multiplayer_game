@@ -19,24 +19,30 @@
                 <div class="green-circle"></div>
                 <div>Online players</div>
             </h2>
-            <div class="players-list">
+            <div class="players-lobby">
                 <div class="player">
                     Petar Petrovic
                 </div>
-            </div>
-            <div class="players-list">
                 <div class="player">
                     Petar Petrovic
                 </div>
-            </div>
-            <div class="players-list">
                 <div class="player">
                     Petar Petrovic
                 </div>
             </div>
         </div>
+        <div class="chat-container">
+            <h2>Chat</h2>
+            <div class="messages-container">
+            </div>
+            <div class="type-message-container">
+                <input id="chatInput" type="text" placeholder="Type message here...">
+                <div id="send-msg-btn">Send</div>
+            </div>
+        </div>
     </main>
-    <script src="index.js"></script>
+    <script type="module" src="/socket.io/socket.io.js"></script>
+    <script type="module" src="index.js"></script>
 </body>
 
 </html>

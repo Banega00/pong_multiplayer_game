@@ -15,10 +15,5 @@ app.post('/login', AppController.loginPlayer)
 
 export const App = app;
 
-const PORT = process.env.PORT;
-app.listen(PORT, () => {
-    console.log(`Server is started at port: ${PORT}`)
-})
-
 
 

@@ -8,6 +8,10 @@ header h1{
     text-align: center;
 }
 
+main{
+    display: flex;
+}
+
 .online-players-container{
     background-color: black;
     border-radius: 15px;
@@ -31,12 +35,76 @@ header h1{
     background-color: rgb(8, 255, 8);
 }
 
-.players-list{
+.players-lobby{
     margin-top:20px;
 }
 
-.players-list .player{
+.players-lobby .player{
     background-color: blue;
     border-radius: 15px;
     padding: 10px;
+    margin: 10px 0;
+}
+
+.chat-container{
+    background-color: red;
+    border-radius: 15px;
+    color:white;
+    height:400px;
+    width:40%;
+    padding: 8px;
+}
+
+.chat-container h2{
+    text-align: center;
+}
+
+.messages-container{
+    background-color: black;
+    height: 80%;
+    border-radius: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+.message-div{
+    background-color: green;
+    padding: 5px;
+    border-radius: 5px;
+    margin:5px 0;
+    min-width: 100px;
+}
+
+.message-div .name{
+    font-size: 0.7em;
+}
+
+.type-message-container{
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+}
+
+.type-message-container > input{
+    flex: 1
+}
+
+#send-msg-btn{
+    background-color: black;
+    padding: 10px;
+    transition: all 0.1s;
+}
+
+#send-msg-btn:hover{
+    cursor: pointer;
+    background-color: grey;
+}
+
+.myMsg{
+    align-self: flex-end;
+    background-color: rgb(8, 197, 8);
 }

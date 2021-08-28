@@ -18,7 +18,7 @@ const submitName = async () => {
 
         console.log(response);
 
-        localStorage.setItem('name', nameInput.value)
+        sessionStorage.setItem('name', nameInput.value)
         window.location = "http://localhost:8080/index.html"
     } catch (error) {
         console.log(error);
