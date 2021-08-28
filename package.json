@@ -1,0 +1,25 @@
+{
+  "name": "pong_multiplayer",
+  "version": "1.0.0",
+  "description": "This project is part of University course called \"Computer Networks\", attended at 5th semester of Undergraduate studies at University of Belgrade, Faculty of Organizational Sciences.",
+  "main": "index.js",
+  "scripts": {
+    "start_client": "node ./client/app.js",
+    "start_server": "node ./server/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Banega00/pong_multiplayer_game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Banega00/pong_multiplayer_game/issues"
+  },
+  "homepage": "https://github.com/Banega00/pong_multiplayer_game#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}
