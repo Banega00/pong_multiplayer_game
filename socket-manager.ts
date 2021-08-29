@@ -3,8 +3,10 @@ import { Socket } from "socket.io";
 export class SocketManager {
 
     private players: { socket: Socket, playerName: string }[];
+    private games: Game[];
     constructor(private readonly io: any) {
         this.players = [];
+        this.games = [];
         this.io.on('connection', (socket: Socket) => {
 
             socket.on('disconnect', () => {
@@ -45,6 +47,27 @@ export class SocketManager {
             socket.on('game_response', (response: boolean, playerName: string, socketId: string) => {
                 socket.to(socketId).emit('game_response', response, playerName, socket.id);
             })
+
+
+            socket.on('players', (player1, player2) => {
+                for (const game of this.games) {
+
+                }
+            })
         })
+    }
+}
+
+interface Game {
+    id: string,
+    players: {
+        player1: {
+            name: string,
+            socket: Socket
+        },
+        player2: {
+            name: string,
+            socket: Socket
+        }
     }
 }

@@ -203,3 +203,23 @@ main{
     /* Adjust with JavaScript */
     height: 5px;
 }
+
+.notifications-container{
+    position: fixed;
+    top:0;
+    left:50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color:white;
+    width: 40%;
+}
+
+.notification{
+    width: 100%;
+    min-width: 200px;
+    min-height: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+}

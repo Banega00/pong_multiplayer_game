@@ -7,6 +7,7 @@ const playersLoby = document.querySelector('.players-lobby')
 const messagesContainer = document.querySelector('.messages-container')
 const chatInput = document.querySelector('#chatInput')
 const gameRequestsContainer = document.querySelector('.game-requests-container');
+const notificationsContainer = document.querySelector('.notifications-container');
 
 if (!playerName) {
     window.location = 'http://localhost:8080/login.html'
@@ -39,10 +40,10 @@ socket.on('new_player_joined', (playerName, socketId) => {
 const requestGame = (event, socketId) => {
     const btn = event.target;
 
-    //disable btn for 8 sec
+    //disable btn for 15 sec
     if (btn.classList.contains('disabled-play-btn')) return;
     btn.classList.add('disabled-play-btn')
-    setInterval(() => btn.classList.remove('disabled-play-btn'), 8000)
+    setInterval(() => btn.classList.remove('disabled-play-btn'), 15000)
 
     //socket.id - is socket id of current player
     //socketId - is socket id of player who receives game request
@@ -70,6 +71,7 @@ socket.on('game_request', (senderName, socketId) => {
         startTimer(gameRequestDiv)
         gameRequestDiv.querySelector('.accept-game-btn').addEventListener('click', () => {
             gameResponse(true, playerName, socketId)
+            popNotification("Accepted! Game will start soon", gotoGame)
             gameRequestDiv.remove();
         })
         gameRequestDiv.querySelector('.decline-game-btn').addEventListener('click', () => {
@@ -80,13 +82,51 @@ socket.on('game_request', (senderName, socketId) => {
     }
 })
 
+function gotoGame() {
+    location = "http://localhost:8080/game.html"
+}
+
 const gameResponse = (response, playerName, socketId) => {
     socket.emit('game_response', response, playerName, socketId);
 }
 
 socket.on('game_response', (response, playerName, socketId) => {
-    console.log(`Player ${playerName} responded on your invitiation: ${response}`)
+    const responseMsg = response ?
+        `${playerName} accepted your game request, game will start soon`
+        : `${playerName} declined your game request`
+
+    if (response) sessionStorage.setItem('opponent', playerName);
+    //notify player
+    popNotification(responseMsg, gotoGame);
 })
+
+function popNotification(notificationMsg, callback) {
+    const notificationId = Math.round(Math.random() * 100000)//random id from 0 to - 100 000
+
+    const newHtml = `<div class="notification" notificationid=${notificationId}>
+    <div class="notificationMsg">${notificationMsg}</div>
+    <div class="notification-counter">5</div>
+    </div>`
+
+    notificationsContainer.insertAdjacentHTML('beforeend', newHtml);
+    const notification = document.querySelector(`[notificationid="${notificationId}"]`)
+    if (notification) notificationCounter(notification, callback)
+}
+
+function notificationCounter(notification, callback) {
+    const counterDiv = notification.querySelector('.notification-counter');
+    let totalTime = 5;
+    const interval = setInterval(() => {
+        if (totalTime <= 0) {
+            clearInterval(interval);
+            notification.remove();
+            callback();
+            return;
+        }
+        counterDiv.innerText = totalTime;
+        totalTime--;
+    }, 1000)
+}
 
 const startTimer = (gameRequestDiv) => {
     const progressbar = gameRequestDiv.querySelector('.progressbar > div')
@@ -95,7 +135,6 @@ const startTimer = (gameRequestDiv) => {
     let onePercent = 12000 / 1000
     const interval = setInterval(() => {
         try {
-            console.log(`${(remainingTime / totalTime) * 100}%`)
             if (remainingTime <= 0) {
                 clearInterval(interval)
                 gameRequestDiv.remove();
@@ -113,6 +152,7 @@ const startTimer = (gameRequestDiv) => {
 }
 socket.on('username_taken', () => {
     alert('Username is already taken!')
+    window.location = "http://localhost:8080/login.html"
 })
 
 socket.on('player_left', (socketId) => {
@@ -140,7 +180,6 @@ socket.on('new_public_message', (senderName, message, socketId) => {
 
 document.querySelectorAll('.playerName').forEach(span => span.innerHTML = `<b>${playerName}</b>!`)
 
-
 //sending messages from chat
 document.getElementById('send-msg-btn').addEventListener('click', function sendMessage() {
     const message = chatInput.value;
@@ -150,8 +189,6 @@ document.getElementById('send-msg-btn').addEventListener('click', function sendM
     chatInput.value = '';
     socket.emit('new_public_message', playerName, message, socket.id)
 })
-
-
 
 
 const playIconSvg = `<svg version="1.1" id="Capa_1"
