@@ -44,6 +44,37 @@ main{
     border-radius: 15px;
     padding: 10px;
     margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.players-lobby .player .controls{
+    display: flex;
+    visibility: hidden;
+}
+
+.players-lobby .player .controls > *{
+    margin-right: 10px;
+}
+
+.players-lobby .player:hover{
+    background-color: lightblue;
+
+}
+
+.players-lobby .player:hover .controls{
+    visibility: visible;
+}
+
+.controls > div{
+    width: 20px;
+    height: 20px;
+    transition: all 0.1s;
+}
+
+.controls > div:hover{
+    transform: scale(1.2);
 }
 
 .chat-container{
@@ -107,4 +138,55 @@ main{
 .myMsg{
     align-self: flex-end;
     background-color: rgb(8, 197, 8);
+}
+
+.disabled-play-btn{
+    cursor: initial;
+    fill: white;
+}
+
+
+.game-requests-container{
+    position: fixed;
+    color:white;
+    bottom:0;
+    left:50%;
+    background-color: black;
+    transform: translateX(-50%);
+    
+} 
+
+.game-requests-container .game-request-div{
+    width: 500px;
+    padding: 10px;
+    background-color: black;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.game-btns{
+    display: flex;
+    align-items: center;
+}
+
+.game-btns > div{
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+
+.game-btns > div:hover{
+    transform: scale(1.3);
+}
+
+.accept-game-btn svg{
+    fill: green;
+    width: 32px;
+    height: 32px;
+}
+.decline-game-btn svg{
+    fill: red;
+    width: 48px;
+    height: 48px;
 }
