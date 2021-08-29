@@ -1,4 +1,4 @@
-const socket = io('http://localhost:8080', {
+export const socket = io('http://localhost:8080', {
     'sync disconnect on unload': true
 });
 
@@ -8,6 +8,7 @@ const messagesContainer = document.querySelector('.messages-container')
 const chatInput = document.querySelector('#chatInput')
 const gameRequestsContainer = document.querySelector('.game-requests-container');
 const notificationsContainer = document.querySelector('.notifications-container');
+export const gameContainer = document.querySelector('#game-container')
 
 if (!playerName) {
     window.location = 'http://localhost:8080/login.html'
@@ -82,8 +83,9 @@ socket.on('game_request', (senderName, socketId) => {
     }
 })
 
-function gotoGame() {
-    location = "http://localhost:8080/game.html"
+export function gotoGame() {
+    gameContainer.classList.remove('closed')
+    gameContainer.classList.add('open')
 }
 
 const gameResponse = (response, playerName, socketId) => {
@@ -189,6 +191,8 @@ document.getElementById('send-msg-btn').addEventListener('click', function sendM
     chatInput.value = '';
     socket.emit('new_public_message', playerName, message, socket.id)
 })
+
+
 
 
 const playIconSvg = `<svg version="1.1" id="Capa_1"

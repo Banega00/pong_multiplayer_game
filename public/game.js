@@ -1,10 +1,34 @@
-const playerName = sessionStorage.getItem('name')
-const opponent = sessionStorage.getItem('opponent')
+import { socket } from './index.js'
+import { gotoGame } from './index.js';
 
-if (!playerName) location = "http://localhost:8080/login.html"
+if (getGameId()) gotoGame();
 
-const socket = io('http://localhost:8080', {
-    'sync disconnect on unload': true
-});
+document.querySelectorAll('.ready-btn').forEach(btn => btn.addEventListener('click', (event) => changeReadyBtnState(event.target)))
 
-socket.emit('players', playerName, opponent);
+const changeReadyBtnState = (btn) => {
+    if (btn.classList.contains('ready')) {
+        btn.classList.remove('ready')
+        btn.classList.add('unready')
+
+        sendReadyState(false, getGameId());
+    } else if (btn.classList.contains('unready')) {
+        btn.classList.remove('unready')
+        btn.classList.add('ready')
+
+        sendReadyState(true, getGameId());
+
+    }
+}
+
+const sendReadyState = (readyState) => {
+    socket.emit('ready_state', readyState, getGameId);
+}
+
+function getGameId() { return window.sessionStorage.getItem('gameId') }
+
+socket.on('game_id', (gameId) => {
+    window.sessionStorage.setItem('gameId', gameId)
+})
+
+
+socket.on('game_started', () => { alert("GAME STARTED") })

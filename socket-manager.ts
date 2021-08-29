@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { uuid } from 'uuidv4';
 
 export class SocketManager {
 
@@ -45,29 +46,78 @@ export class SocketManager {
             })
 
             socket.on('game_response', (response: boolean, playerName: string, socketId: string) => {
+                if (response) {//if player accepted invitation
+                    const game: Game = {
+                        id: uuid(),
+                        status: GameStatus.PREPARING,
+                        players: {
+                            player1: {
+                                name: playerName,
+                                socketId: socket.id,
+                                ready: false
+                            },
+                            player2: {
+                                name: '',
+                                socketId: socketId,
+                                ready: false
+                            }
+                        }
+                    }
+                    this.games.push(game)
+                    socket.emit('game_id', game.id);
+                    socket.to(socketId).emit('game_id', game.id);
+                }
                 socket.to(socketId).emit('game_response', response, playerName, socket.id);
             })
 
-
-            socket.on('players', (player1, player2) => {
+            socket.on('ready_state', (readyState: boolean, gameId: string) => {
                 for (const game of this.games) {
+                    if (game.id === gameId) {
+                        if (game.players.player1.socketId === socket.id) {
+                            //first player sent message
+                            game.players.player1.ready = readyState
+                        } else {
+                            //second player sent message
+                            game.players.player2.ready = readyState
+                        }
+                        if (bothPlayersReady(game)) {
+                            this.io.to(game.players.player1.socketId).emit('game_started')
+                            this.io.to(game.players.player2.socketId).emit('game_started')
+                            game.status = GameStatus.ACTIVE;
+                        }
 
+                        break;
+                    }
                 }
             })
         })
     }
 }
 
+//returns true if ready status of both players is true 
+function bothPlayersReady(game: Game): boolean {
+    return game.players.player1.ready && game.players.player2.ready
+}
+
 interface Game {
     id: string,
+    status: GameStatus,
     players: {
         player1: {
             name: string,
-            socket: Socket
+            socketId: string
+            ready: boolean
         },
         player2: {
             name: string,
-            socket: Socket
+            socketId: string
+            ready: boolean
         }
     }
+}
+
+enum GameStatus {
+    ACTIVE = 'ACTIVE',
+    FINISHED = 'FINISHED',
+    PREPARING = 'PREPARING'
 }
