@@ -156,7 +156,7 @@ main{
     
 } 
 
-.game-requests-container .game-request-div{
+.game-requests-container .game-request-div-inner{
     width: 500px;
     padding: 10px;
     background-color: black;
@@ -189,4 +189,17 @@ main{
     fill: red;
     width: 48px;
     height: 48px;
+}
+
+
+.progressbar {
+    background-color: black;
+    /* (height of inner div) / 2 + padding */
+}
+  
+.progressbar>div {
+    background-color: greenyellow;
+    width: 100%;
+    /* Adjust with JavaScript */
+    height: 5px;
 }

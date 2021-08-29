@@ -38,8 +38,12 @@ export class SocketManager {
 
             //player request a game against another player
             //socketId is socket id of player who received game request
-            socket.on('game_request', (playerName, socketId) => {
+            socket.on('game_request', (playerName: string, socketId: string) => {
                 socket.to(socketId).emit('game_request', playerName, socket.id);
+            })
+
+            socket.on('game_response', (response: boolean, playerName: string, socketId: string) => {
+                socket.to(socketId).emit('game_response', response, playerName, socket.id);
             })
         })
     }

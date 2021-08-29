@@ -6,6 +6,7 @@ const playerName = sessionStorage.getItem('name')
 const playersLoby = document.querySelector('.players-lobby')
 const messagesContainer = document.querySelector('.messages-container')
 const chatInput = document.querySelector('#chatInput')
+const gameRequestsContainer = document.querySelector('.game-requests-container');
 
 if (!playerName) {
     window.location = 'http://localhost:8080/login.html'
@@ -48,11 +49,68 @@ const requestGame = (event, socketId) => {
     socket.emit("game_request", playerName, socketId);
 }
 
-socket.on('game_request', (playerName, socketId) => {
+socket.on('game_request', (senderName, socketId) => {
+    const newHtml = `
+    <div class="game-request-div" socketid=${socketId}>
+            <div class="progressbar">
+                <div></div>
+            </div>
+            <div class="game-request-div-inner">
+                Player ${senderName} invited you for a game!
+                <div class="game-btns">
+                    <div class="accept-game-btn">${checkMark}</div>
+                    <div class="decline-game-btn">${xMark}</div>
+                </div>
+            </div>
+        </div>
+    </div>`
+    gameRequestsContainer.insertAdjacentHTML('beforeend', newHtml)
+    const gameRequestDiv = gameRequestsContainer.querySelector(`.game-request-div[socketid="${socketId}"]`)
+    if (gameRequestDiv) {
+        startTimer(gameRequestDiv)
+        gameRequestDiv.querySelector('.accept-game-btn').addEventListener('click', () => {
+            gameResponse(true, playerName, socketId)
+            gameRequestDiv.remove();
+        })
+        gameRequestDiv.querySelector('.decline-game-btn').addEventListener('click', () => {
+            gameResponse(false, playerName, socketId);
+            gameRequestDiv.remove();
+        })
 
-    console.log(`Player ${playerName} requested a game with you!`)
+    }
 })
 
+const gameResponse = (response, playerName, socketId) => {
+    socket.emit('game_response', response, playerName, socketId);
+}
+
+socket.on('game_response', (response, playerName, socketId) => {
+    console.log(`Player ${playerName} responded on your invitiation: ${response}`)
+})
+
+const startTimer = (gameRequestDiv) => {
+    const progressbar = gameRequestDiv.querySelector('.progressbar > div')
+    const totalTime = 12000; //12000 msec === 12 sec
+    let remainingTime = totalTime;
+    let onePercent = 12000 / 1000
+    const interval = setInterval(() => {
+        try {
+            console.log(`${(remainingTime / totalTime) * 100}%`)
+            if (remainingTime <= 0) {
+                clearInterval(interval)
+                gameRequestDiv.remove();
+                gameResponse(false, playerName, gameRequestDiv.getAttribute('socketid'))
+                return;
+            }
+            remainingTime -= onePercent;
+            progressbar.style.width = `${(remainingTime / totalTime) * 100}%`
+        } catch (err) {
+            gameRequestDiv.remove()
+            clearInterval(interval)
+            gameResponse(false, playerName, gameRequestDiv.getAttribute('socketid'))
+        }
+    }, onePercent)
+}
 socket.on('username_taken', () => {
     alert('Username is already taken!')
 })
