@@ -17,16 +17,15 @@
 }
 
 .player-board{
-    margin:auto;
-    width: 60%;
     min-width: 600px;
-    height: 200px;
-    background-color: black;
+    height: 100%;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .player-board .player{
-    width: 50%;
+    width: 200px;
     height: 100px;
     display: flex;
     flex-direction: column;
@@ -43,7 +42,6 @@
     padding: 15px 25px;
     font-size: 24px;
     text-align: center;
-    cursor: pointer;
     outline: none;
     color: #fff;
     background-color: #04AA6D;
@@ -51,6 +49,8 @@
     border-radius: 15px;
     box-shadow: 0 9px #999;
 }
+
+
 
 .ready-btn.unready{
     background-color: #c20404;
@@ -60,11 +60,17 @@
     background-color: #04AA6D;
 }
 
-.ready-btn:hover {
-    
+.ready-btn.your-btn {
+    cursor: pointer;
 }
 
-.ready-btn:active {
+.ready-btn.your-btn:active {
   box-shadow: 0 5px #666;
   transform: translateY(4px);
+}
+
+.canvas-container{
+    border:5px solid black;
+    width: fit-content;
+    margin:auto;
 }

@@ -8,6 +8,10 @@ const messagesContainer = document.querySelector('.messages-container')
 const chatInput = document.querySelector('#chatInput')
 const gameRequestsContainer = document.querySelector('.game-requests-container');
 const notificationsContainer = document.querySelector('.notifications-container');
+
+const playerBoardNames = document.querySelectorAll('.player-board .player h2');
+const playerBoardButtons = document.querySelectorAll('.player .ready-btn');
+
 export const gameContainer = document.querySelector('#game-container')
 
 if (!playerName) {
@@ -17,16 +21,18 @@ if (!playerName) {
 socket.on('connect', () => {
     console.log("You are connected with", socket.id);
 
-    socket.emit("join_lobby", playerName);
+    setTimeout(() => socket.emit("join_lobby", playerName), 50);
 })
 
-socket.on('new_player_joined', (playerName, socketId) => {
+socket.on('new_player_joined', (otherPlayerName) => {
+    //other player name is name of player who joined
+
     //dont set playIcon and msgIcon for current player
-    const playIcon = socketId === socket.id ? '' : `<div class="play-icon" title="Challange player on pong game">${playIconSvg}</div>`
-    const msgIcon = socketId === socket.id ? '' : `<div class="chat-icon" title="Send player private message">${msgIconSvg}<div>`
+    const playIcon = otherPlayerName === playerName ? '' : `<div class="play-icon" title="Challange player on pong game">${playIconSvg}</div>`
+    const msgIcon = otherPlayerName === playerName ? '' : `<div class="chat-icon" title="Send player private message">${msgIconSvg}<div>`
     const newHtml = `
-    <div class="player" socketId=${socketId}>
-        <div class="player-name">${playerName}</div>
+    <div class="player" player=${otherPlayerName}>
+        <div class="player-name">${otherPlayerName}</div>
         <div class="controls">
             ${playIcon}
             ${msgIcon}
@@ -34,11 +40,11 @@ socket.on('new_player_joined', (playerName, socketId) => {
     </div>`
     playersLoby.insertAdjacentHTML('beforeend', newHtml)
 
-    const playIconElement = document.querySelector(`.player[socketid="${socketId}"] .play-icon`)
-    if (playIconElement) playIconElement.addEventListener('click', (event) => requestGame(event, socketId))
+    const playIconElement = document.querySelector(`.player[player="${otherPlayerName}"] .play-icon`)
+    if (playIconElement) playIconElement.addEventListener('click', (event) => requestGame(event, otherPlayerName))
 })
 
-const requestGame = (event, socketId) => {
+const requestGame = (event, opponentName) => {
     const btn = event.target;
 
     //disable btn for 15 sec
@@ -48,12 +54,13 @@ const requestGame = (event, socketId) => {
 
     //socket.id - is socket id of current player
     //socketId - is socket id of player who receives game request
-    socket.emit("game_request", playerName, socketId);
+    socket.emit("game_request", opponentName, playerName);
 }
 
-socket.on('game_request', (senderName, socketId) => {
+socket.on('game_request', (senderName) => {
+    //senderName is name of player who sent game invitation
     const newHtml = `
-    <div class="game-request-div" socketid=${socketId}>
+    <div class="game-request-div" player=${senderName}>
             <div class="progressbar">
                 <div></div>
             </div>
@@ -67,16 +74,16 @@ socket.on('game_request', (senderName, socketId) => {
         </div>
     </div>`
     gameRequestsContainer.insertAdjacentHTML('beforeend', newHtml)
-    const gameRequestDiv = gameRequestsContainer.querySelector(`.game-request-div[socketid="${socketId}"]`)
+    const gameRequestDiv = gameRequestsContainer.querySelector(`.game-request-div[player="${senderName}"]`)
     if (gameRequestDiv) {
         startTimer(gameRequestDiv)
         gameRequestDiv.querySelector('.accept-game-btn').addEventListener('click', () => {
-            gameResponse(true, playerName, socketId)
+            gameResponse(true, senderName, playerName)
             popNotification("Accepted! Game will start soon", gotoGame)
             gameRequestDiv.remove();
         })
         gameRequestDiv.querySelector('.decline-game-btn').addEventListener('click', () => {
-            gameResponse(false, playerName, socketId);
+            gameResponse(false, senderName, playerName);
             gameRequestDiv.remove();
         })
 
@@ -86,21 +93,43 @@ socket.on('game_request', (senderName, socketId) => {
 export function gotoGame() {
     gameContainer.classList.remove('closed')
     gameContainer.classList.add('open')
+    document.querySelector('.ready-btn.your-btn').addEventListener('click', (event) => changeReadyBtnState(event.target))
 }
 
-const gameResponse = (response, playerName, socketId) => {
-    socket.emit('game_response', response, playerName, socketId);
+const gameResponse = (response, senderName, playerName) => {
+    if (response) {
+        setPlayerNameOnBoard(playerName, 1)
+        setYourReadyButton(1);
+        setPlayerNameOnBoard(senderName, 0)
+    };
+    socket.emit('game_response', response, playerName, senderName);
 }
 
-socket.on('game_response', (response, playerName, socketId) => {
+socket.on('game_response', (response, opponent) => {
+    if (response) {
+        setPlayerNameOnBoard(playerName, 0)
+        setYourReadyButton(0);
+        setPlayerNameOnBoard(opponent, 1);
+    };
     const responseMsg = response ?
-        `${playerName} accepted your game request, game will start soon`
-        : `${playerName} declined your game request`
+        `${opponent} accepted your game request, game will start soon`
+        : `${opponent} declined your game request`
 
-    if (response) sessionStorage.setItem('opponent', playerName);
+    if (response) sessionStorage.setItem('opponent', opponent);
+
+    const callbackFunction = response ? gotoGame : () => 0;
     //notify player
-    popNotification(responseMsg, gotoGame);
+    popNotification(responseMsg, callbackFunction);
 })
+
+const setYourReadyButton = (index) => {
+    if (playerBoardButtons.item(index)) playerBoardButtons.item(index).classList.add('your-btn')
+}
+
+//index may be 0 or 1
+function setPlayerNameOnBoard(playerName, index) {
+    if (playerBoardNames.item(index)) playerBoardNames.item(index).innerText = playerName;
+}
 
 function popNotification(notificationMsg, callback) {
     const notificationId = Math.round(Math.random() * 100000)//random id from 0 to - 100 000
@@ -157,10 +186,10 @@ socket.on('username_taken', () => {
     window.location = "http://localhost:8080/login.html"
 })
 
-socket.on('player_left', (socketId) => {
+socket.on('player_left', (playerName) => {
 
     //Player left - remove him from online players list
-    const playerElement = document.querySelector(`.players-lobby .player[socketId="${socketId}"] `)
+    const playerElement = document.querySelector(`.players-lobby .player[player="${playerName}"] `)
 
     if (playerElement) playerElement.remove();
 })
@@ -191,6 +220,39 @@ document.getElementById('send-msg-btn').addEventListener('click', function sendM
     chatInput.value = '';
     socket.emit('new_public_message', playerName, message, socket.id)
 })
+
+export const changeReadyBtnState = (btn) => {
+    if (btn.classList.contains('ready')) {
+        btn.classList.remove('ready')
+        btn.classList.add('unready')
+
+        sendReadyState(false, getGameId());
+    } else if (btn.classList.contains('unready')) {
+        btn.classList.remove('unready')
+        btn.classList.add('ready')
+
+        sendReadyState(true, getGameId());
+
+    }
+}
+
+const sendReadyState = (readyState) => {
+    socket.emit('ready_state', readyState, getGameId());
+}
+
+socket.on('ready_state', readyState => {
+    console.log("STIGAO MI JE ", readyState)
+    const readyBtn = document.querySelector('.ready-btn:not(.your-btn)');
+    if (readyState) {
+        readyBtn.classList.remove('unready');
+        readyBtn.classList.add('ready');
+    } else {
+        readyBtn.classList.remove('ready');
+        readyBtn.classList.add('unready');
+    }
+})
+
+export function getGameId() { return window.sessionStorage.getItem('gameId') }
 
 
 
