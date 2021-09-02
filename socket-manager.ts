@@ -72,7 +72,7 @@ export class SocketManager {
 
             socket.on('game_response', (response: boolean, playerName: string, senderName: string) => {
                 //sender is player who initiated game request
-                const senderSocketId: string = this.findPlayer(senderName).socket.id;
+                const senderSocket: Socket = this.findPlayer(senderName).socket;
 
                 if (response) {//if player accepted invitation
                     const game: Game = {
@@ -81,40 +81,44 @@ export class SocketManager {
                         players: {
                             player1: {
                                 name: senderName,
-                                socketId: senderSocketId,
+                                socket: senderSocket,
                                 ready: false
                             },
                             player2: {
                                 name: playerName,
-                                socketId: socket.id,
+                                socket: socket,
                                 ready: false
                             }
                         }
                     }
                     this.games.push(game)
                     socket.emit('game_id', game.id);
-                    socket.to(senderSocketId).emit('game_id', game.id);
+                    socket.to(senderSocket.id).emit('game_id', game.id);
+
+                    socket.join(game.id);
+                    senderSocket.join(game.id)
+
                 }
-                socket.to(senderSocketId).emit('game_response', response, playerName, socket.id);
+                socket.to(senderSocket.id).emit('game_response', response, playerName, socket.id);
             })
 
             socket.on('ready_state', (readyState: boolean, gameId: string) => {
                 for (const game of this.games) {
                     if (game.id === gameId) {
-                        if (game.players.player1.socketId === socket.id) {
+                        if (game.players.player1.socket.id === socket.id) {
                             //first player pressed ready btn
                             //notify second player
-                            this.io.to(game.players.player2.socketId).emit('ready_state', readyState)
+                            this.io.to(game.players.player2.socket.id).emit('ready_state', readyState)
                             game.players.player1.ready = readyState
                         } else {
                             //second player pressed ready btn
                             //notify first player
-                            this.io.to(game.players.player1.socketId).emit('ready_state', readyState)
+                            this.io.to(game.players.player1.socket.id).emit('ready_state', readyState)
                             game.players.player2.ready = readyState
                         }
                         if (bothPlayersReady(game)) {
-                            this.io.to(game.players.player1.socketId).emit('game_started')
-                            this.io.to(game.players.player2.socketId).emit('game_started')
+                            this.io.to(game.players.player1.socket.id).emit('game_started')
+                            this.io.to(game.players.player2.socket.id).emit('game_started')
                             game.status = GameStatus.ACTIVE;
                         }
 
@@ -122,15 +126,19 @@ export class SocketManager {
                     }
                 }
             })
+
+            socket.on('update_position', (x, y, index, gameId) => {
+                this.io.in(gameId).emit(x, y, index);
+            })
         })
     }
 
     private updatePlayersGame(player: Player) {
         for (const game of this.games) {
             if (game.players.player1.name === player.playerName) {
-                game.players.player1.socketId = player.socket.id
+                game.players.player1.socket = player.socket
             } else if (game.players.player2.name === player.playerName) {
-                game.players.player2.socketId = player.socket.id
+                game.players.player2.socket = player.socket
             }
         }
     }
@@ -187,12 +195,12 @@ interface Game {
     players: {
         player1: {
             name: string,
-            socketId: string
+            socket: Socket,
             ready: boolean
         },
         player2: {
             name: string,
-            socketId: string
+            socket: Socket,
             ready: boolean
         }
     }

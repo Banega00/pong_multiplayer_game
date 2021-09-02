@@ -2,6 +2,7 @@ export const socket = io('http://localhost:8080', {
     'sync disconnect on unload': true
 });
 
+
 const playerName = sessionStorage.getItem('name')
 const playersLoby = document.querySelector('.players-lobby')
 const messagesContainer = document.querySelector('.messages-container')
@@ -11,6 +12,8 @@ const notificationsContainer = document.querySelector('.notifications-container'
 
 const playerBoardNames = document.querySelectorAll('.player-board .player h2');
 const playerBoardButtons = document.querySelectorAll('.player .ready-btn');
+
+export let playerGameIndex;
 
 export const gameContainer = document.querySelector('#game-container')
 
@@ -100,7 +103,8 @@ const gameResponse = (response, senderName, playerName) => {
     if (response) {
         setPlayerNameOnBoard(playerName, 1)
         setYourReadyButton(1);
-        setPlayerNameOnBoard(senderName, 0)
+        setPlayerNameOnBoard(senderName, 0);
+        playerGameIndex = 1;
     };
     socket.emit('game_response', response, playerName, senderName);
 }
@@ -110,6 +114,7 @@ socket.on('game_response', (response, opponent) => {
         setPlayerNameOnBoard(playerName, 0)
         setYourReadyButton(0);
         setPlayerNameOnBoard(opponent, 1);
+        playerGameIndex = 2;
     };
     const responseMsg = response ?
         `${opponent} accepted your game request, game will start soon`
@@ -241,7 +246,6 @@ const sendReadyState = (readyState) => {
 }
 
 socket.on('ready_state', readyState => {
-    console.log("STIGAO MI JE ", readyState)
     const readyBtn = document.querySelector('.ready-btn:not(.your-btn)');
     if (readyState) {
         readyBtn.classList.remove('unready');
@@ -253,7 +257,6 @@ socket.on('ready_state', readyState => {
 })
 
 export function getGameId() { return window.sessionStorage.getItem('gameId') }
-
 
 
 
