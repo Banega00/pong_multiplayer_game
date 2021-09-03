@@ -7,15 +7,6 @@
     background-color: white;
     z-index: 1;
 }
-
-#game-container.closed{
-    visibility: hidden;
-}
-
-#game-container.open{
-    visibility: visible;
-}
-
 .player-board{
     min-width: 600px;
     height: 100%;
@@ -88,10 +79,7 @@
   transform: translateY(4px);
 }
 
-.canvas-container{
-    border:5px solid black;
-    width: fit-content;
-    height: fit-content;
+.canvas-container {
     margin: 50px;
     align-self: auto;
 }
@@ -105,10 +93,6 @@
     color:white;
     padding: 10px;
 }
-
-.colorpicker-div input{
-}
-
 .winning-points-div,.max-duration-div {
     display: flex;
     flex-direction: row;

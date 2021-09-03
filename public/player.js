@@ -6,7 +6,7 @@ export default class Player {
         this.index = index;
         this.x = 0;
         this.y = 0;
-        this.width = 30;
+        this.width = 20;
         this.height = 100;
 
         this.centerPlayer(index);

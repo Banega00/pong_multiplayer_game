@@ -1,8 +1,10 @@
+import { prepareCanvas } from "./game";
+
 export const socket = io('http://localhost:8080', {
     'sync disconnect on unload': true
 });
 
-const playerName = sessionStorage.getItem('name')
+export const playerName = sessionStorage.getItem('name')
 const playersLoby = document.querySelector('.players-lobby')
 const messagesContainer = document.querySelector('.messages-container')
 const chatInput = document.querySelector('#chatInput')
@@ -34,7 +36,10 @@ socket.on('new_player_joined', (otherPlayerName) => {
     const msgIcon = otherPlayerName === playerName ? '' : `<div class="chat-icon" title="Send player private message">${msgIconSvg}<div>`
     const newHtml = `
     <div class="player" player=${otherPlayerName}>
-        <div class="player-name">${otherPlayerName}</div>
+        <div class="player-name">
+            <div class='player-status online'></div>
+            ${otherPlayerName}
+        </div>
         <div class="controls">
             ${playIcon}
             ${msgIcon}
@@ -92,10 +97,56 @@ socket.on('game_request', (senderName) => {
     }
 })
 
-export function gotoGame() {
-    gameContainer.classList.remove('closed')
-    gameContainer.classList.add('open')
+export function gotoGame(index, playerName) {
+    const gameDiv = `
+<div id="game-container">
+    <div class="player-board">
+        <div class="player">
+            <h2>Player 1</h2>
+            <div class="points">0</div>
+            <div class="colorpicker-div">
+                <div class="text">Pick your color</div>
+                <input type="color">
+            </div>
+            <div class="winning-points-div">
+                <div class="text">Pick winning points </div>
+                <input class="winning-points" type="number" value="5">
+            </div>
+            <div class="max-duration-div">
+                <div class="text">Pick max game duration (minutes) </div>
+                <input class="max-duration" type="number" value="5">
+            </div>
+            <div class="ready-btn-div">
+                <button class="ready-btn unready">Ready?</button>
+            </div>
+        </div>
+        <div id="clock">5:00</div>
+        <div class="canvas-container">
+            <canvas></canvas>
+        </div>
+        <div class="player">
+            <h2>Player 2</h2>
+            <div class="points">0</div>
+            <div class="colorpicker-div">
+                <div class="text">Pick your color</div>
+                <input type="color">
+            </div>
+            <div class="ready-btn-div">
+                <button class="ready-btn unready">Ready?</button>
+            </div>
+        </div>
+    </div>
+</div>`
+    
+    document.body.insertAdjacentElement('beforeend', gameDiv)
     document.querySelector('.ready-btn.your-btn').addEventListener('click', (event) => changeReadyBtnState(event.target))
+
+    
+    prepareCanvas();
+}
+
+export function gotoLobby() {
+    document.querySelector('#game-container').remove();
 }
 
 const gameResponse = (response, senderName, playerName) => {
@@ -106,9 +157,27 @@ const gameResponse = (response, senderName, playerName) => {
         setPlayerNameOnBoard(senderName, 0);
         playerGameIndex = 2;
         setColorsListeners();
+        
+        setStatus(playerName, 2)//status 2 - player is currently in game
+                                //status 1 - player is in lobby
     };
     socket.emit('game_response', response, playerName, senderName);
 }
+
+export function setStatus(playerName, status){
+    socket.emit('set_status', playerName, status);
+}
+
+socket.on('set_status', (playerName, status)=>{
+    const playerStatus = document.querySelector(`.player[player="${playerName}"] .player-status`)
+    if(status === 1){
+        playerStatus.classList.remove('ingame')
+        playerStatus.classList.add('online')
+    }else if(status === 2){
+        playerStatus.classList.remove('online')
+        playerStatus.classList.add('ingame')
+    }
+})
 
 
 
@@ -130,6 +199,7 @@ socket.on('game_response', (response, opponent) => {
         setPlayerNameOnBoard(opponent, 1);
         playerGameIndex = 1;
         setColorsListeners()
+        setStatus(playerName, 2)
     };
     const responseMsg = response ?
         `${opponent} accepted your game request, game will start soon`

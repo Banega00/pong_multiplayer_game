@@ -30,6 +30,11 @@ export class SocketManager {
                 }
             });
 
+            socket.on('set_status', (playerName, status) =>{
+                console.log(`player ${playerName} changed status to ${status}`)
+                this.io.emit('set_status', playerName, status)
+            })
+
             //new player joined the lobby - broadcast that to all other players
             socket.on('join_lobby', playerName => {
                 //check if player reconnected
@@ -122,9 +127,9 @@ export class SocketManager {
                             game.players.player2.ready = readyState
                         }
                         if (gameConfig.maxDuration) game.maxDuration = gameConfig.maxDuration * 60;//maxDuration converted from minutes to seconds
-                        if (gameConfig.maxPoints) game.maxPoints = gameConfig.maxPoints
+                        if (gameConfig.winningPoints) game.maxPoints = gameConfig.winningPoints
                         if (bothPlayersReady(game)) {
-                            this.io.to(game.id).emit('game_started')
+                            this.io.to(game.id).emit('game_started', game.maxPoints)
                             this.startGame(game);
                         }
                         break;
@@ -159,6 +164,9 @@ export class SocketManager {
 
                     //
                     if (game.players.player1.points >= game.maxPoints) {
+                        this.endGame(game)
+                    }else if(game.players.player2.points >= game.maxPoints){
+                        this.endGame(game)
                     }
                 }
             })
@@ -180,9 +188,30 @@ export class SocketManager {
         }, sec)
     }
 
-    private endGame(game: Game, interval: NodeJS.Timer) {
-        console.log("GAME ENDED")
-        clearInterval(interval);
+    private endGame(game: Game, interval?: NodeJS.Timer) {
+        game.status = GameStatus.FINISHED;
+        let player1Points = game.players.player1.points;
+        let player2Points = game.players.player2.points;
+
+        let winner:any;
+        if(player1Points > player2Points){
+            winner = {
+                name: game.players.player1.name,
+                points: game.players.player1.points
+            }
+        }else if(player1Points < player2Points){
+            winner = {
+                name: game.players.player1.name,
+                points: game.players.player1.points
+            }
+        }else{
+            winner = null;
+        }
+        this.games = this.games.filter(g => g.id != game.id);
+
+        this.io.in(game.id).emit('end_game', winner);
+
+        if(interval)clearInterval(interval);
     }
 
     private updatePlayersGame(player: Player) {

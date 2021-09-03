@@ -1,7 +1,7 @@
 import Player from "./player.js";
 import Ball from "./ball.js"
 
-import { socket, changePlayerColorInputs, gotoGame, getGameId, playerGameIndex } from './index.js'
+import { socket, changePlayerColorInputs, gotoGame, getGameId, playerGameIndex, gotoLobby, setStatus, playerName } from './index.js'
 
 if (getGameId()) gotoGame();
 
@@ -26,7 +26,14 @@ socket.on('time_report', seconds => {
     document.querySelector('#clock').innerText = `${mins}:${sec}`
 })
 
-socket.on('game_started', startGame)
+socket.on('game_started', (maxPoints) => {
+    writeMaxPoints(maxPoints);
+    startGame() 
+})
+
+function writeMaxPoints(maxPoints){
+
+}
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 450;
@@ -40,19 +47,29 @@ const balls = [
     new Ball(10, 20, 20, 'black')
 ]
 
+export function prepareCanvas(){
+    //CANVAS
+    const canvas = document.querySelector('canvas');
+    export const canvasRect = canvas.getBoundingClientRect();
 
-//CANVAS
-const canvas = document.querySelector('canvas');
-export const canvasRect = canvas.getBoundingClientRect();
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    export const c = canvas.getContext('2d')
 
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
-export const c = canvas.getContext('2d')
+    prepareGameScreen();
+}
 
-prepareGameScreen();
+
+
+
+
 
 function prepareGameScreen() {
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+
+    c.fillStyle = "#75b8eb";
+    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
     balls.forEach(ball => {
         ball.centerBall()
         ball.draw();
@@ -80,6 +97,9 @@ const animate = () => {
     window.requestAnimationFrame(animate);
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
+    c.fillStyle = "#75b8eb";
+    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
     players.forEach(player => player.update());
     balls.forEach(ball => ball.draw());
 
@@ -95,12 +115,35 @@ socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
 })
 
-socket.on('point', index => {
+socket.on('point', index => incrementPoint(index))
+
+socket.on('end_game', winner => {
+    showEndOfGameDiv(winner)
+    
+    setStatus(playerName, 1);
+    gotoLobby();
+})
+
+function showEndOfGameDiv(winner){
+    let message;
+    if(!winner) message=`GAME TIED`;
+    else message = `Player ${winner.player} won!!!`
+    const div = `
+    <div class="end-of-game-div>
+        <div>${message}</div>
+        <div class="controls">
+            <div class="back-to-lobby-btn">Back to lobby</div>
+        </div>
+    </div>`
+    document.insertAdjacentHTML('beforeend', div);
+    document.querySelector(".back-to-lobby-btn").addEventListener('click', gotoLobby)
+}
+
+function incrementPoint(index){
     let h = document.querySelectorAll('.player .points')[index - 1];
     let points = h.innerText;
     points = parseInt(points);
     points++;
     h.innerText = points;
     balls.forEach(ball => ball.centerBall())
-})
-
+}
