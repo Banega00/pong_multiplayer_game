@@ -69,16 +69,21 @@ export default class Player {
     updatePosition(x, y) {
         this.y = y - this.height / 2 - canvasRect.y;
     }
+
+    changeColor(color) {
+        this.color = color;
+        this.update()
+    }
 }
 
 window.addEventListener('mousemove', (event) => updatePoistion(event));
 
 function updatePoistion(event) {
-    socket.emit('update_position', event.clientX, event.clientY, playerGameIndex, gameId);
+    if (gameId)
+        socket.emit('update_position', event.clientX, event.clientY, playerGameIndex, gameId);
 }
 
 socket.on('update_position', (x, y, index) => {
-    console.log("STIZE MI, ", x, y, index)
     players[index - 1].updatePosition(x, y);
 })
 

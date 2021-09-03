@@ -26,16 +26,34 @@
 
 .player-board .player{
     width: 200px;
-    height: 100px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 10px;
+    background-color: black;
+}
+
+.player-board .player > *{
+    flex:1;
 }
 .player-board .player h2{
     width: 100%;
     background-color: rgb(29, 248, 175);
     text-align: center;
     padding: 10px;
+    flex-basis: 80px;
+    flex-grow: 0;
+    
+}
+
+.ready-btn-div{
+    background-color: black;
+    width: 100%;
+    padding:5px;
+    margin-bottom: auto;
+    display: flex;
+    align-items: flex-end;   
 }
 
 .ready-btn{
@@ -47,6 +65,7 @@
     background-color: #04AA6D;
     border: none;
     border-radius: 15px;
+    width: 100%;
     box-shadow: 0 9px #999;
 }
 
@@ -75,4 +94,56 @@
     height: fit-content;
     margin: 50px;
     align-self: auto;
+}
+
+
+
+.colorpicker-div{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    color:white;
+    padding: 10px;
+}
+
+.colorpicker-div input{
+}
+
+.winning-points-div,.max-duration-div {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    color:white;
+    padding:10px;
+    align-items: center;
+    justify-content: space-between;
+}
+.winning-points-div input,.max-duration-div input{
+    width: 40px;
+    height: 30px;
+}
+
+.player div.points{
+    width: 100%;
+    font-size: 6.5em;
+    color:white;
+    background-color: rgb(1, 75, 109);
+    text-align: center;
+    flex-basis: 160px;
+    flex-grow: 0;
+}
+
+#clock{
+    position: absolute;
+    top:0px;
+    right:50%;
+    transform: translateX(50%);
+    background-color: black;
+    color:white;
+    font-size: 3em;
+    padding:10px;
+    padding-top:3px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+
 }

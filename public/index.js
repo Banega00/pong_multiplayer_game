@@ -2,7 +2,6 @@ export const socket = io('http://localhost:8080', {
     'sync disconnect on unload': true
 });
 
-
 const playerName = sessionStorage.getItem('name')
 const playersLoby = document.querySelector('.players-lobby')
 const messagesContainer = document.querySelector('.messages-container')
@@ -102,11 +101,26 @@ export function gotoGame() {
 const gameResponse = (response, senderName, playerName) => {
     if (response) {
         setPlayerNameOnBoard(playerName, 1)
+        setPlayerGameOptions();
         setYourReadyButton(1);
         setPlayerNameOnBoard(senderName, 0);
-        playerGameIndex = 1;
+        playerGameIndex = 2;
+        setColorsListeners();
     };
     socket.emit('game_response', response, playerName, senderName);
+}
+
+
+
+function setPlayerGameOptions() {
+
+    if (playerGameIndex === 1) {
+        document.querySelector('.winning-points-div').style.display = 'block';
+        document.querySelector('.max-duration-div').style.display = 'block';
+    } else {
+        document.querySelector('.winning-points-div').style.display = 'none';
+        document.querySelector('.max-duration-div').style.display = 'none';
+    }
 }
 
 socket.on('game_response', (response, opponent) => {
@@ -114,7 +128,8 @@ socket.on('game_response', (response, opponent) => {
         setPlayerNameOnBoard(playerName, 0)
         setYourReadyButton(0);
         setPlayerNameOnBoard(opponent, 1);
-        playerGameIndex = 2;
+        playerGameIndex = 1;
+        setColorsListeners()
     };
     const responseMsg = response ?
         `${opponent} accepted your game request, game will start soon`
@@ -126,6 +141,37 @@ socket.on('game_response', (response, opponent) => {
     //notify player
     popNotification(responseMsg, callbackFunction);
 })
+
+export function changePlayerColorInputs(color, index) {
+    const colorPickers = document.querySelectorAll('input[type="color"]')
+    if (index === 1) {
+        colorPickers[0].value = color;
+    }
+    if (index === 2) {
+        colorPickers[1].value = color;
+    }
+}
+
+function setColorsListeners() {
+    const colorPickers = document.querySelectorAll('input[type="color"]')
+    let index = playerGameIndex;
+    //if index is 1 - set event listener to 0th colorpicker
+    //if index is 2 - set event listener to 2th colorpicker
+    if (index === 1) {
+        colorPickers[1].disabled = true;
+        colorPickers[0].addEventListener('change', (event) => {
+            const color = event.target.value;
+            socket.emit('color_change', color, index, getGameId())
+        })
+    }
+    if (index === 2) {
+        colorPickers[0].disabled = true;
+        colorPickers[1].addEventListener('change', (event) => {
+            const color = event.target.value;
+            socket.emit('color_change', color, index, getGameId())
+        })
+    }
+}
 
 const setYourReadyButton = (index) => {
     if (playerBoardButtons.item(index)) playerBoardButtons.item(index).classList.add('your-btn')
@@ -242,7 +288,22 @@ export const changeReadyBtnState = (btn) => {
 }
 
 const sendReadyState = (readyState) => {
-    socket.emit('ready_state', readyState, getGameId());
+    const colorPickers = document.querySelectorAll('input[type="color"]')
+    const gameConfig = {
+    };
+    if (playerGameIndex === 1) {
+        gameConfig.player1Color = colorPickers[0].value;
+
+        let maxDuration = document.querySelector('.max-duration').value;
+        gameConfig.maxDuration = (maxDuration > 1 && maxDuration <= 20) ? maxDuration : 5;
+
+        let winningPoints = document.querySelector('.winning-points').value;
+        gameConfig.winningPoints = (winningPoints > 1 && winningPoints <= 30) ? winningPoints : 5;
+    } else if (playerGameIndex === 2) {
+        gameConfig.player2Color = colorPickers[1].value;
+    }
+
+    socket.emit('ready_state', readyState, gameConfig, getGameId());
 }
 
 socket.on('ready_state', readyState => {

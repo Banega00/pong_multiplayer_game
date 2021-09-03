@@ -78,16 +78,21 @@ export class SocketManager {
                     const game: Game = {
                         id: uuid(),
                         status: GameStatus.PREPARING,
+                        maxDuration: 5,
+                        currentDuration: 0,
+                        maxPoints: 5,
                         players: {
                             player1: {
                                 name: senderName,
                                 socket: senderSocket,
-                                ready: false
+                                ready: false,
+                                points: 0
                             },
                             player2: {
                                 name: playerName,
                                 socket: socket,
-                                ready: false
+                                ready: false,
+                                points: 0
                             }
                         }
                     }
@@ -102,7 +107,7 @@ export class SocketManager {
                 socket.to(senderSocket.id).emit('game_response', response, playerName, socket.id);
             })
 
-            socket.on('ready_state', (readyState: boolean, gameId: string) => {
+            socket.on('ready_state', (readyState: boolean, gameConfig: any, gameId: string) => {
                 for (const game of this.games) {
                     if (game.id === gameId) {
                         if (game.players.player1.socket.id === socket.id) {
@@ -116,21 +121,68 @@ export class SocketManager {
                             this.io.to(game.players.player1.socket.id).emit('ready_state', readyState)
                             game.players.player2.ready = readyState
                         }
+                        if (gameConfig.maxDuration) game.maxDuration = gameConfig.maxDuration * 60;//maxDuration converted from minutes to seconds
+                        if (gameConfig.maxPoints) game.maxPoints = gameConfig.maxPoints
                         if (bothPlayersReady(game)) {
-                            this.io.to(game.players.player1.socket.id).emit('game_started')
-                            this.io.to(game.players.player2.socket.id).emit('game_started')
-                            game.status = GameStatus.ACTIVE;
+                            this.io.to(game.id).emit('game_started')
+                            this.startGame(game);
                         }
-
                         break;
                     }
                 }
             })
 
+            socket.on('color_change', (color, index, gameId) => {
+                this.io.to(gameId).emit('color_change', color, index);
+            })
+
             socket.on('update_position', (x, y, index, gameId) => {
-                this.io.in(gameId).emit(x, y, index);
+                this.io.in(gameId).emit('update_position', x, y, index);
+            })
+
+            socket.on('update_ball_position', (x, y, gameId) => {
+                this.io.in(gameId).emit('update_ball_position', x, y);
+            })
+
+            socket.on('point', (index, gameId) => {
+                this.io.in(gameId).emit('point', index);
+
+                //update game points
+                for (const game of this.games) {
+                    if (game.id = gameId) {
+                        if (index === 1) {
+                            game.players.player1.points++;
+                        } else if (index === 2) {
+                            game.players.player2.points++;
+                        }
+                    }
+
+                    //
+                    if (game.players.player1.points >= game.maxPoints) {
+                    }
+                }
             })
         })
+    }
+
+    private startGame(game: Game) {
+
+        game.status = GameStatus.ACTIVE;
+
+        game.maxDuration--;
+
+        let sec = 1000;//sec === 1000 msec
+        const gameInterval = setInterval(() => {
+            //send time report
+            if (game.maxDuration <= 0) this.endGame(game, gameInterval);
+            this.io.to(game.id).emit("time_report", game.maxDuration)
+            game.maxDuration--;
+        }, sec)
+    }
+
+    private endGame(game: Game, interval: NodeJS.Timer) {
+        console.log("GAME ENDED")
+        clearInterval(interval);
     }
 
     private updatePlayersGame(player: Player) {
@@ -196,14 +248,19 @@ interface Game {
         player1: {
             name: string,
             socket: Socket,
-            ready: boolean
+            ready: boolean,
+            points: number
         },
         player2: {
             name: string,
             socket: Socket,
             ready: boolean
+            points: number
         }
     }
+    maxDuration: number,
+    currentDuration: number,
+    maxPoints: number
 }
 
 enum GameStatus {

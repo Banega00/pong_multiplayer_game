@@ -1,4 +1,5 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, c, players } from "./game.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, c, players, gameId } from "./game.js";
+import { socket } from "./index.js";
 export default class Ball {
     constructor(x, y, radius, color) {
         this.x = x;
@@ -25,11 +26,11 @@ export default class Ball {
     }
 
     centerBall() {
-        this.x = CANVAS_WIDTH / 5;
-        this.y = CANVAS_HEIGHT / 5;
+        this.x = CANVAS_WIDTH / 2;
+        this.y = CANVAS_HEIGHT / 2;
     }
 
-    update() {
+    calculateNextPos() {
         this.detectWalls();
         players.forEach(player => {
             //speedX moze da bude i pozitivan i negativ
@@ -54,14 +55,26 @@ export default class Ball {
             }
         }
         )
-        this.y += this.speedY;
-        this.x += this.speedX;
-        this.draw();
+        let y = this.y + this.speedY;
+        let x = this.x + this.speedX;
+
+        return { x, y };
+    }
+
+    setPosition(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
     detectWalls() {
-        if (this.x + this.radius >= CANVAS_WIDTH) this.speedX *= -1;
-        // if (this.x - this.radius <= 0) this.speedX *= -1;    
+        if (this.x + this.radius >= CANVAS_WIDTH) {
+            emitPoint(1)//player 1 gets the point
+            this.speedX *= -1;
+        }
+        if (this.x - this.radius <= 0) {
+            emitPoint(2)//player 2 gets the point
+            this.speedX *= -1;
+        }
         if (this.y + this.radius >= CANVAS_HEIGHT) this.speedY *= -1;
         if (this.y - this.radius <= 0) this.speedY *= -1;
     }
@@ -82,7 +95,8 @@ export default class Ball {
         } else if (player.index === 2) {
             if (this.y - this.radius >= player.y &&
                 this.y + this.radius <= player.y &&
-                this.x + this.radius >= player.x) {
+                this.x + this.radius >= player.x &&
+                this.x - this.radius <= player.x + player.width) {
                 return true;
             }
         }
@@ -90,3 +104,8 @@ export default class Ball {
         return false;
     }
 }
+
+function emitPoint(index) {
+    socket.emit('point', index, gameId);
+}
+
