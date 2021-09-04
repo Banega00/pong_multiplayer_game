@@ -1,5 +1,5 @@
 
-export const socket = io('https://pong-multiplayer-game-rmt.herokuapp.com', {
+export const socket = io('http://localhost:8000', {
     'sync disconnect on unload': true
 });
 
@@ -18,7 +18,7 @@ export let playerGameIndex;
 export const gameContainer = document.querySelector('#game-container')
 
 if (!playerName) {
-    window.location = 'https://pong-multiplayer-game-rmt.herokuapp.com/login.html'
+    window.location = 'http://localhost:8000/login.html'
 }
 
 socket.on('connect', () => {
@@ -299,7 +299,7 @@ const startTimer = (gameRequestDiv) => {
 }
 socket.on('username_taken', () => {
     alert('Username is already taken!')
-    window.location = "https://pong-multiplayer-game-rmt.herokuapp.com/login.html"
+    window.location = "http://localhost:8000/login.html"
 })
 
 socket.on('player_left', (playerName) => {

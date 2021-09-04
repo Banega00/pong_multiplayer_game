@@ -64,6 +64,13 @@ export default class Ball {
         return { x, y };
     }
 
+    update() {
+        const { x, y } = this.calculateNextPos();
+        this.x = x;
+        this.y = y;
+        this.draw();
+    }
+
     setPosition(x, y) {
         this.x = x;
         this.y = y;

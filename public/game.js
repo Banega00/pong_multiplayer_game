@@ -100,15 +100,15 @@ const animate = () => {
     c.fillStyle = "#75b8eb";
     c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    balls.forEach(ball => ball.draw());
+    balls.forEach(ball => ball.update());
     players.forEach(player => player.update());
 
-    if (playerGameIndex === 1) {
-        balls.forEach(ball => {
-            let { x, y } = ball.calculateNextPos();
-            socket.emit('update_ball_position', x, y, gameId)
-        });
-    }
+    // if (playerGameIndex === 1) {
+    //     balls.forEach(ball => {
+    //         let { x, y } = ball.calculateNextPos();
+    //         socket.emit('update_ball_position', x, y, gameId)
+    //     });
+    // }
 }
 
 socket.on('update_ball_position', (x, y) => {

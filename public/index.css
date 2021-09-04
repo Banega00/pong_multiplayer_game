@@ -108,6 +108,7 @@ body{
     color:white;
     width:25%;
     padding: 0px 20px 50px;
+    overflow: auto;
 }
 
 .chat-container h2{
@@ -135,7 +136,7 @@ body{
 }
 
 .message-div .name{
-    color:rgb(182, 182, 182);
+    color:rgb(0, 0, 0);
     font-size: 0.7em;
 }
 
@@ -143,6 +144,7 @@ body{
     padding: 5px;
     display: flex;
     flex-direction: row;
+    overflow: auto;
 }
 
 .type-message-container > input{
