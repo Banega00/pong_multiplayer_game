@@ -1,5 +1,5 @@
 
-export const socket = io('http://localhost:8080', {
+export const socket = io('http://localhost:8000', {
     'sync disconnect on unload': true
 });
 
@@ -18,7 +18,7 @@ export let playerGameIndex;
 export const gameContainer = document.querySelector('#game-container')
 
 if (!playerName) {
-    window.location = 'http://localhost:8080/login.html'
+    window.location = 'http://localhost:8000/login.html'
 }
 
 socket.on('connect', () => {
@@ -27,15 +27,16 @@ socket.on('connect', () => {
     setTimeout(() => socket.emit("join_lobby", playerName), 50);
 })
 
-socket.on('new_player_joined', (otherPlayerName) => {
+socket.on('new_player_joined', (otherPlayerName, status) => {
     //other player name is name of player who joined
-
     //dont set playIcon for current player
+    let playerStatus = '';
+    if (status) playerStatus = status.toLowerCase() === "online" ? 'online' : 'ingame';
     const playIcon = otherPlayerName === playerName ? '' : `<div class="play-icon" title="Challange player on pong game">${playIconSvg}</div>`
     const newHtml = `
     <div class="player" player=${otherPlayerName}>
         <div class="player-name">
-            <div class='player-status online'></div>
+            <div class='player-status ${playerStatus}'></div>
             ${otherPlayerName}
         </div>
         <div class="controls">
@@ -298,7 +299,7 @@ const startTimer = (gameRequestDiv) => {
 }
 socket.on('username_taken', () => {
     alert('Username is already taken!')
-    window.location = "http://localhost:8080/login.html"
+    window.location = "http://localhost:8000/login.html"
 })
 
 socket.on('player_left', (playerName) => {

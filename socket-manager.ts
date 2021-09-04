@@ -31,6 +31,7 @@ export class SocketManager {
             });
 
             socket.on('set_status', (playerName, status) => {
+                this.setPlayerStatus(playerName, status);
                 this.io.emit('set_status', playerName, status)
             })
 
@@ -57,7 +58,7 @@ export class SocketManager {
                     }
                 }
                 console.log(`New player joined the room: ${playerName} - ${socket.id}`)
-                this.io.emit('new_player_joined', playerName)
+                this.io.emit('new_player_joined', playerName, PlayerStatus[PlayerStatus.ONLINE])
                 this.sendAllPreviousPlayers(socket);
                 this.players.push({ playerName, socket, status: PlayerStatus.ONLINE, reconnectIntreval: null })
             })
@@ -172,6 +173,16 @@ export class SocketManager {
         })
     }
 
+    private setPlayerStatus(playerName, status) {
+        const playerStatus = status === 1 ? PlayerStatus.ONLINE : PlayerStatus.OFFLINE;
+        for (const player of this.players) {
+            if (player.playerName === playerName) {
+                player.status = playerStatus;
+                return;
+            }
+        }
+    }
+
     private startGame(game: Game) {
 
         game.status = GameStatus.ACTIVE;
@@ -244,7 +255,7 @@ export class SocketManager {
 
     private sendAllPreviousPlayers(socket: Socket) {
         for (const player of this.players) {
-            socket.emit('new_player_joined', player.playerName)
+            socket.emit('new_player_joined', player.playerName, player.status)
         }
     }
 
