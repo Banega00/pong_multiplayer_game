@@ -30,8 +30,7 @@ export class SocketManager {
                 }
             });
 
-            socket.on('set_status', (playerName, status) =>{
-                console.log(`player ${playerName} changed status to ${status}`)
+            socket.on('set_status', (playerName, status) => {
                 this.io.emit('set_status', playerName, status)
             })
 
@@ -165,7 +164,7 @@ export class SocketManager {
                     //
                     if (game.players.player1.points >= game.maxPoints) {
                         this.endGame(game)
-                    }else if(game.players.player2.points >= game.maxPoints){
+                    } else if (game.players.player2.points >= game.maxPoints) {
                         this.endGame(game)
                     }
                 }
@@ -182,7 +181,10 @@ export class SocketManager {
         let sec = 1000;//sec === 1000 msec
         const gameInterval = setInterval(() => {
             //send time report
-            if (game.maxDuration <= 0) this.endGame(game, gameInterval);
+            if (game.maxDuration <= 0) {
+                this.endGame(game, gameInterval);
+                clearInterval(gameInterval)
+            };
             this.io.to(game.id).emit("time_report", game.maxDuration)
             game.maxDuration--;
         }, sec)
@@ -193,25 +195,31 @@ export class SocketManager {
         let player1Points = game.players.player1.points;
         let player2Points = game.players.player2.points;
 
-        let winner:any;
-        if(player1Points > player2Points){
+        let winner: any;
+        if (player1Points > player2Points) {
             winner = {
                 name: game.players.player1.name,
                 points: game.players.player1.points
             }
-        }else if(player1Points < player2Points){
+        } else if (player1Points < player2Points) {
             winner = {
                 name: game.players.player1.name,
                 points: game.players.player1.points
             }
-        }else{
+        } else {
             winner = null;
         }
+        //remove game from array;
         this.games = this.games.filter(g => g.id != game.id);
 
+        //emit end game_event
         this.io.in(game.id).emit('end_game', winner);
 
-        if(interval)clearInterval(interval);
+        //remove sockets from room
+        game.players.player1.socket.leave(game.id)
+        game.players.player2.socket.leave(game.id)
+
+        if (interval) clearInterval(interval);
     }
 
     private updatePlayersGame(player: Player) {

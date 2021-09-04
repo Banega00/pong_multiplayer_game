@@ -31,7 +31,7 @@ export default class Ball {
     }
 
     calculateNextPos() {
-        let x,y;
+        let x, y;
         players.forEach(player => {
             this.detectWalls()
             //speedX moze da bude i pozitivan i negativ
@@ -42,7 +42,7 @@ export default class Ball {
                     let collision = this.detectPlayer(player, i)
                     if (collision) {
                         this.speedX *= -1;
-                        this.speedX += this.speedX > 0 ? 0.5 : -0.5; 
+                        this.speedX += this.speedX > 0 ? 0.5 : -0.5;
                         return;
                     }
                 }
@@ -51,7 +51,7 @@ export default class Ball {
                     let collision = this.detectPlayer(player, i)
                     if (collision) {
                         this.speedX *= -1;
-                        this.speedX += this.speedX > 0 ? 0.5 : -0.5; 
+                        this.speedX += this.speedX > 0 ? 0.5 : -0.5;
                         return;
                     }
                 }
@@ -60,7 +60,6 @@ export default class Ball {
         )
         y = this.y + this.speedY;
         x = this.x + this.speedX;
-        console.log(y, this.speedY)
 
         return { x, y };
     }
@@ -97,7 +96,7 @@ export default class Ball {
             y: this.y + speed
         }
 
-        
+
         if (player.index === 1) {
             if (newPos.y >= player.y &&
                 newPos.y <= player.y + player.height &&
@@ -107,7 +106,7 @@ export default class Ball {
             }
 
         } else if (player.index === 2) {
-            if (this.y >= player.y  &&
+            if (this.y >= player.y &&
                 this.y <= player.y + player.height &&
                 this.x >= player.x &&
                 this.x <= player.x + player.width) {

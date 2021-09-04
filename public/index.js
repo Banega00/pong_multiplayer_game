@@ -1,4 +1,3 @@
-import { prepareCanvas } from "./game";
 
 export const socket = io('http://localhost:8080', {
     'sync disconnect on unload': true
@@ -31,9 +30,8 @@ socket.on('connect', () => {
 socket.on('new_player_joined', (otherPlayerName) => {
     //other player name is name of player who joined
 
-    //dont set playIcon and msgIcon for current player
+    //dont set playIcon for current player
     const playIcon = otherPlayerName === playerName ? '' : `<div class="play-icon" title="Challange player on pong game">${playIconSvg}</div>`
-    const msgIcon = otherPlayerName === playerName ? '' : `<div class="chat-icon" title="Send player private message">${msgIconSvg}<div>`
     const newHtml = `
     <div class="player" player=${otherPlayerName}>
         <div class="player-name">
@@ -42,7 +40,6 @@ socket.on('new_player_joined', (otherPlayerName) => {
         </div>
         <div class="controls">
             ${playIcon}
-            ${msgIcon}
         </div>
     </div>`
     playersLoby.insertAdjacentHTML('beforeend', newHtml)
@@ -65,6 +62,9 @@ const requestGame = (event, opponentName) => {
 }
 
 socket.on('game_request', (senderName) => {
+    //if player already accepted game don't let him accept another game
+    if (getGameId()) return;
+
     //senderName is name of player who sent game invitation
     const newHtml = `
     <div class="game-request-div" player=${senderName}>
@@ -97,83 +97,59 @@ socket.on('game_request', (senderName) => {
     }
 })
 
-export function gotoGame(index, playerName) {
-    const gameDiv = `
-<div id="game-container">
-    <div class="player-board">
-        <div class="player">
-            <h2>Player 1</h2>
-            <div class="points">0</div>
-            <div class="colorpicker-div">
-                <div class="text">Pick your color</div>
-                <input type="color">
-            </div>
-            <div class="winning-points-div">
-                <div class="text">Pick winning points </div>
-                <input class="winning-points" type="number" value="5">
-            </div>
-            <div class="max-duration-div">
-                <div class="text">Pick max game duration (minutes) </div>
-                <input class="max-duration" type="number" value="5">
-            </div>
-            <div class="ready-btn-div">
-                <button class="ready-btn unready">Ready?</button>
-            </div>
-        </div>
-        <div id="clock">5:00</div>
-        <div class="canvas-container">
-            <canvas></canvas>
-        </div>
-        <div class="player">
-            <h2>Player 2</h2>
-            <div class="points">0</div>
-            <div class="colorpicker-div">
-                <div class="text">Pick your color</div>
-                <input type="color">
-            </div>
-            <div class="ready-btn-div">
-                <button class="ready-btn unready">Ready?</button>
-            </div>
-        </div>
-    </div>
-</div>`
-    
-    document.body.insertAdjacentElement('beforeend', gameDiv)
-    document.querySelector('.ready-btn.your-btn').addEventListener('click', (event) => changeReadyBtnState(event.target))
+const changeReadyBtnListener = (event) => changeReadyBtnState(event.target)
 
-    
-    prepareCanvas();
+export function gotoGame() {
+    gameContainer.classList.remove('closed');
+    gameContainer.classList.add('open')
+
+    document.querySelector('.ready-btn.your-btn').removeEventListener('click', changeReadyBtnListener)
+    document.querySelector('.ready-btn.your-btn').addEventListener('click', changeReadyBtnListener)
 }
 
+
 export function gotoLobby() {
-    document.querySelector('#game-container').remove();
+    setStatus(playerName, 1)
+    const endOfGameDiv = document.querySelector('.end-of-game-div');
+    endOfGameDiv.remove();
+
+    gameContainer.classList.remove('open');
+    gameContainer.classList.add('closed');
 }
 
 const gameResponse = (response, senderName, playerName) => {
+    //if player already accepted game don't let him accept another one
+    if (sessionStorage.getItem('gameId')) return;
+
     if (response) {
-        setPlayerNameOnBoard(playerName, 1)
+        setPlayerNameOnBoard(playerName, 1);
+        resetResults();
         setPlayerGameOptions();
         setYourReadyButton(1);
         setPlayerNameOnBoard(senderName, 0);
         playerGameIndex = 2;
         setColorsListeners();
-        
+
         setStatus(playerName, 2)//status 2 - player is currently in game
-                                //status 1 - player is in lobby
+        //status 1 - player is in lobby
     };
     socket.emit('game_response', response, playerName, senderName);
 }
 
-export function setStatus(playerName, status){
+function resetResults() {
+    document.querySelectorAll('.player .points').forEach(pointDiv => pointDiv.innerHTML = '0')
+}
+
+export function setStatus(playerName, status) {
     socket.emit('set_status', playerName, status);
 }
 
-socket.on('set_status', (playerName, status)=>{
+socket.on('set_status', (playerName, status) => {
     const playerStatus = document.querySelector(`.player[player="${playerName}"] .player-status`)
-    if(status === 1){
+    if (status === 1) {
         playerStatus.classList.remove('ingame')
         playerStatus.classList.add('online')
-    }else if(status === 2){
+    } else if (status === 2) {
         playerStatus.classList.remove('online')
         playerStatus.classList.add('ingame')
     }
@@ -182,13 +158,16 @@ socket.on('set_status', (playerName, status)=>{
 
 
 function setPlayerGameOptions() {
-
+    const winningPointsDiv = document.querySelector('.winning-points-div');
+    const maxDurationDiv = document.querySelector('.max-duration-div');
     if (playerGameIndex === 1) {
-        document.querySelector('.winning-points-div').style.display = 'block';
-        document.querySelector('.max-duration-div').style.display = 'block';
+        winningPointsDiv.style.display = 'block';
+        maxDurationDiv.style.display = 'block';
+        winningPointsDiv.querySelector('input').value = 5;
+        maxDurationDiv.querySelector('input').value = 5;
     } else {
-        document.querySelector('.winning-points-div').style.display = 'none';
-        document.querySelector('.max-duration-div').style.display = 'none';
+        winningPointsDiv.style.display = 'none';
+        maxDurationDiv.style.display = 'none';
     }
 }
 
@@ -196,6 +175,7 @@ socket.on('game_response', (response, opponent) => {
     if (response) {
         setPlayerNameOnBoard(playerName, 0)
         setYourReadyButton(0);
+        resetResults();
         setPlayerNameOnBoard(opponent, 1);
         playerGameIndex = 1;
         setColorsListeners()
@@ -229,6 +209,7 @@ function setColorsListeners() {
     //if index is 2 - set event listener to 2th colorpicker
     if (index === 1) {
         colorPickers[1].disabled = true;
+        colorPickers[0].disabled = false;
         colorPickers[0].addEventListener('change', (event) => {
             const color = event.target.value;
             socket.emit('color_change', color, index, getGameId())
@@ -236,15 +217,27 @@ function setColorsListeners() {
     }
     if (index === 2) {
         colorPickers[0].disabled = true;
+        colorPickers[1].disabled = false;
         colorPickers[1].addEventListener('change', (event) => {
             const color = event.target.value;
             socket.emit('color_change', color, index, getGameId())
         })
     }
+
+    colorPickers[0].value = "black";
+    colorPickers[1].value = "black";
 }
 
 const setYourReadyButton = (index) => {
-    if (playerBoardButtons.item(index)) playerBoardButtons.item(index).classList.add('your-btn')
+    for (var i = 0; i < playerBoardButtons.length; i++) {
+        playerBoardButtons[i].classList.remove('ready');
+        playerBoardButtons[i].classList.add('unready');
+        if (index == i) {
+            playerBoardButtons[i].classList.add('your-btn');
+        } else {
+            playerBoardButtons[i].classList.remove('your-btn');
+        }
+    }
 }
 
 //index may be 0 or 1
@@ -253,6 +246,7 @@ function setPlayerNameOnBoard(playerName, index) {
 }
 
 function popNotification(notificationMsg, callback) {
+
     const notificationId = Math.round(Math.random() * 100000)//random id from 0 to - 100 000
 
     const newHtml = `<div class="notification" notificationid=${notificationId}>
@@ -368,7 +362,7 @@ const sendReadyState = (readyState) => {
         gameConfig.maxDuration = (maxDuration > 1 && maxDuration <= 20) ? maxDuration : 5;
 
         let winningPoints = document.querySelector('.winning-points').value;
-        gameConfig.winningPoints = (winningPoints > 1 && winningPoints <= 30) ? winningPoints : 5;
+        gameConfig.winningPoints = (winningPoints >= 1 && winningPoints <= 30) ? winningPoints : 5;
     } else if (playerGameIndex === 2) {
         gameConfig.player2Color = colorPickers[1].value;
     }
@@ -434,71 +428,7 @@ C49.663,29.47,49.611,29.561,49.524,29.612z" />
 <g>
 </g>
 </svg>`
-const msgIconSvg = `<svg version="1.1" id="Layer_1"
-xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-y="0px" viewBox="0 0 512.256 512.256" style="enable-background:new 0 0 512.256 512.256;"
-xml:space="preserve">
-<g transform="translate(-1)">
-    <g>
-        <g>
-            <path d="M506.885,337.001c-6.513-6.513-11.672-13.908-15.628-22.083c-7.715-15.942-10.273-33.007-9.73-47.561
-       c20.811-26.105,31.607-54.246,31.607-85.939c0-88.441-84.11-149.333-192-149.333c-91.631,0-167.02,44.194-186.79,113.094
-       C56.182,163.011,1.123,216.525,1.123,288.077c0,31.711,10.796,59.857,31.607,85.943c0.542,14.553-2.016,31.616-9.73,47.556
-       c-3.956,8.175-9.116,15.57-15.628,22.083c-15.894,15.894,0.427,42.389,21.772,35.343c10.156-3.353,27.536-10.064,50.455-19.339
-       c1.812-0.734,1.812-0.734,3.621-1.468c12.108-4.918,24.86-10.181,37.472-15.444c5.119-2.136,9.449-3.952,12.747-5.34h59.685
-       c89.492,0,162.617-41.897,184.957-106.658h2.738c3.298,1.388,7.628,3.204,12.747,5.34c12.612,5.263,25.364,10.527,37.472,15.444
-       c1.809,0.734,1.809,0.734,3.621,1.468c22.919,9.275,40.299,15.987,50.455,19.339C506.457,379.39,522.779,352.895,506.885,337.001
-       z M193.123,394.744h-64c-2.856,0-5.683,0.573-8.313,1.686c-3.271,1.384-9.052,3.816-16.55,6.944
-       c-11.502,4.8-23.119,9.599-34.228,14.123c5.005-17.612,6.207-34.916,5.032-50.441c-0.144-1.908-0.302-3.364-0.434-4.321
-       c-0.561-4.075-2.288-7.902-4.974-11.018c-17.475-20.277-25.867-40.512-25.867-63.641c0-51.349,43.84-91.452,108.987-103.17
-       c0.926-0.035,1.864-0.126,2.81-0.285c12.565-2.115,25.042-3.203,37.548-3.203c46.083,0,85.348,12.787,112.033,33.974
-       c23.541,18.695,37.29,43.927,37.29,72.685c0,0.845-0.017,1.686-0.04,2.525c-0.164,4.558-0.764,9.338-1.816,14.733
-       c-0.132,0.678-0.223,1.352-0.289,2.024C328.651,358.692,270.501,394.744,193.123,394.744z M444.594,245.068
-       c-2.682,3.115-4.407,6.938-4.968,11.01c-0.132,0.957-0.289,2.413-0.434,4.321c-1.175,15.525,0.027,32.829,5.032,50.441
-       c-11.109-4.524-22.726-9.323-34.228-14.123c-7.498-3.129-13.279-5.56-16.55-6.944c-2.63-1.113-5.457-1.686-8.313-1.686
-       c0-42.842-19.737-79.219-52.352-105.342c-34.716-27.81-84.025-44-139.658-44c-3.414,0-6.803,0.062-10.168,0.183
-       c21.669-38.669,73.586-64.174,138.178-64.174c86.748,0,149.333,45.31,149.333,106.667
-       C470.467,204.528,462.074,224.765,444.594,245.068z" />
-            <path
-                d="M129.123,266.744h85.333c11.782,0,21.333-9.551,21.333-21.333c0-11.782-9.551-21.333-21.333-21.333h-85.333
-       c-11.782,0-21.333,9.551-21.333,21.333C107.789,257.193,117.341,266.744,129.123,266.744z" />
-            <path
-                d="M257.123,309.411h-128c-11.782,0-21.333,9.551-21.333,21.333c0,11.782,9.551,21.333,21.333,21.333h128
-       c11.782,0,21.333-9.551,21.333-21.333C278.456,318.962,268.905,309.411,257.123,309.411z" />
-        </g>
-    </g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-<g>
-</g>
-</svg>`
+
 
 const checkMark = `<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 width="8px" height="8px" viewBox="0 0 8 8" enable-background="new 0 0 8 8" xml:space="preserve">

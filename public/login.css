@@ -12,6 +12,12 @@ body{
     justify-content: center;
 }
 
+body{
+    background-image: url('/images/svemir4.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 .login-container{
     width: 300px;
     height: 200px;

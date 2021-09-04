@@ -1,7 +1,8 @@
 import Player from "./player.js";
 import Ball from "./ball.js"
 
-import { socket, changePlayerColorInputs, gotoGame, getGameId, playerGameIndex, gotoLobby, setStatus, playerName } from './index.js'
+import { socket, changePlayerColorInputs, gotoGame, getGameId, playerGameIndex, gotoLobby, playerName } from './index.js'
+let animationFrameId;
 
 if (getGameId()) gotoGame();
 
@@ -28,10 +29,10 @@ socket.on('time_report', seconds => {
 
 socket.on('game_started', (maxPoints) => {
     writeMaxPoints(maxPoints);
-    startGame() 
+    startGame()
 })
 
-function writeMaxPoints(maxPoints){
+function writeMaxPoints(maxPoints) {
 
 }
 
@@ -47,17 +48,16 @@ const balls = [
     new Ball(10, 20, 20, 'black')
 ]
 
-export function prepareCanvas(){
-    //CANVAS
-    const canvas = document.querySelector('canvas');
-    export const canvasRect = canvas.getBoundingClientRect();
+export let canvasRect;
+export let c;
 
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-    export const c = canvas.getContext('2d')
-
-    prepareGameScreen();
-}
+//CANVAS
+const canvas = document.querySelector('canvas');
+canvasRect = canvas.getBoundingClientRect();
+canvas.width = CANVAS_WIDTH;
+canvas.height = CANVAS_HEIGHT;
+c = canvas.getContext('2d')
+prepareGameScreen();
 
 
 
@@ -69,7 +69,7 @@ function prepareGameScreen() {
 
     c.fillStyle = "#75b8eb";
     c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    
+
     balls.forEach(ball => {
         ball.centerBall()
         ball.draw();
@@ -94,14 +94,14 @@ function startGame() {
 }
 
 const animate = () => {
-    window.requestAnimationFrame(animate);
+    animationFrameId = window.requestAnimationFrame(animate);
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
     c.fillStyle = "#75b8eb";
     c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    players.forEach(player => player.update());
     balls.forEach(ball => ball.draw());
+    players.forEach(player => player.update());
 
     if (playerGameIndex === 1) {
         balls.forEach(ball => {
@@ -118,28 +118,40 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
+    players.forEach(player => {
+        player.color = 'black';
+    })
+
     showEndOfGameDiv(winner)
-    
-    setStatus(playerName, 1);
-    gotoLobby();
+
+    //reset clock
+    document.querySelector('#clock').innerText = '5:00';
+
+
+    window.sessionStorage.removeItem('gameId')
+
+    prepareGameScreen();
+    window.cancelAnimationFrame(animationFrameId);
+
 })
 
-function showEndOfGameDiv(winner){
+function showEndOfGameDiv(winner) {
     let message;
-    if(!winner) message=`GAME TIED`;
-    else message = `Player ${winner.player} won!!!`
+    if (!winner) message = `GAME TIED`;
+    else if (winner.name == playerName) message = "CONGRATULATIONS YOU WON"
+    else message = `YOU LOSE :( \n PLAYER ${winner.name} WON`
     const div = `
-    <div class="end-of-game-div>
+    <div class="end-of-game-div">
         <div>${message}</div>
-        <div class="controls">
+        <div>
             <div class="back-to-lobby-btn">Back to lobby</div>
         </div>
     </div>`
-    document.insertAdjacentHTML('beforeend', div);
+    document.body.insertAdjacentHTML('beforeend', div);
     document.querySelector(".back-to-lobby-btn").addEventListener('click', gotoLobby)
 }
 
-function incrementPoint(index){
+function incrementPoint(index) {
     let h = document.querySelectorAll('.player .points')[index - 1];
     let points = h.innerText;
     points = parseInt(points);

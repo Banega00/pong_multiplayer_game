@@ -4,22 +4,33 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+header{
+    background-color: rgba(4, 21, 116, 0.75);
+    padding:10px
+
+}
+
 header h1{
     text-align: center;
+    color:white;
 }
+
 
 main{
     display: flex;
+    justify-content: space-between;
+    height: 100%;
 }
 
 .online-players-container{
-    background-color: black;
-    border-radius: 15px;
+    background-color: rgba(0, 0, 0, 0.75);
+    border-bottom-right-radius: 25px;
     color:white;
     height:400px;
-    width:40%;
+    width:400px;
     padding: 5px;
     padding-right: 10px;
+    overflow: auto  ;
 }
 
 .online-players-container h2{
@@ -35,23 +46,28 @@ main{
     background-color: rgb(8, 255, 8);
 }
 
+.playerName{
+    color: rgb(24, 226, 149);
+    font-size: 1.3em;
+}
+
 .players-lobby{
     margin-top:20px;
 }
 
 .players-lobby .player{
-    background-color: blue;
+    background-color: rgb(55, 55, 175);
     border-radius: 15px;
-    padding: 10px;
-    margin: 10px 0;
+    padding: 12px;
+    margin: 15px 0;
     display: flex;
+    width: 90%;
     justify-content: space-between;
     cursor: pointer;
 }
 
 .players-lobby .player .controls{
     display: flex;
-    visibility: hidden;
 }
 
 .players-lobby .player .controls > *{
@@ -59,12 +75,7 @@ main{
 }
 
 .players-lobby .player:hover{
-    background-color: lightblue;
-
-}
-
-.players-lobby .player:hover .controls{
-    visibility: visible;
+    background-color: rgb(24, 226, 149);
 }
 
 .controls > div{
@@ -77,13 +88,26 @@ main{
     transform: scale(1.2);
 }
 
+html{
+    overflow: hidden;
+}
+
+html, body {
+    margin: 0;
+    height: 99%;
+}
+
+body{
+    background-image: url('/images/svemir4.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 .chat-container{
-    background-color: red;
-    border-radius: 15px;
+    background-color: rgba(4, 21, 116,0.75);
     color:white;
-    height:400px;
-    width:40%;
-    padding: 8px;
+    width:25%;
+    padding: 0px 20px 50px;
 }
 
 .chat-container h2{
@@ -91,7 +115,7 @@ main{
 }
 
 .messages-container{
-    background-color: black;
+    background-color: rgba(0, 0, 0, 0.5);
     height: 80%;
     border-radius: 10px;
     width: 100%;
@@ -111,6 +135,7 @@ main{
 }
 
 .message-div .name{
+    color:rgb(182, 182, 182);
     font-size: 0.7em;
 }
 
@@ -249,8 +274,36 @@ main{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 300px;
-    background-color: black;
+    width: 70vw;
+    height: 60vh;
+    background-color: rgba(7, 13, 102, 0.904);
+    z-index: 5;
+    color: white;
+    border-radius: 20px;
+    font-size: 2.5em;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 20px;
+    align-items: center;
 }
+
+.end-of-game-div > * {
+    position: relative;
+    text-align: center;
+}
+
+.back-to-lobby-btn{
+    font-size: 24px;
+    padding: 15px;
+    background-color: rgb(12, 202, 129);
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.back-to-lobby-btn:hover{
+    background-color: rgb(8, 107, 69);
+}
+
+
 

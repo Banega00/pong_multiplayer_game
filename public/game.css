@@ -7,6 +7,15 @@
     background-color: white;
     z-index: 1;
 }
+
+#game-container.closed{
+    visibility: hidden;
+}
+
+#game-container.open{
+    visibility: visible;
+}
+
 .player-board{
     min-width: 600px;
     height: 100%;
