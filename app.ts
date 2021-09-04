@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv';
-import express from 'express';
-import mongoose from 'mongoose'
+import * as express from 'express';
+import * as mongoose from 'mongoose'
 import { AppController } from './app-controller';
-import bodyParser from 'body-parser';
+import * as bodyParser from 'body-parser';
 import { Server, Socket } from "socket.io";
 
 dotenv.config();

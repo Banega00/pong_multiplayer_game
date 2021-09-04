@@ -1,5 +1,5 @@
 const http = require('http');
-import mongoose from 'mongoose'
+import * as mongoose from 'mongoose'
 import { App } from './app';
 import { Server, Socket } from "socket.io";
 import { SocketManager } from './socket-manager';
