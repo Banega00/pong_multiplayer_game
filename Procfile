@@ -1,2 +1,2 @@
-start: ts-node main.ts
-web: ts-node main.ts
+start: npm start
+web: npm start
