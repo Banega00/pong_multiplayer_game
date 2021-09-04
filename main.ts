@@ -21,10 +21,15 @@ import { SocketManager } from './socket-manager';
         const socketManager = new SocketManager(io);
 
         //turning on server
-        const PORT = process.env.PORT;
+        let PORT: any = process.env.PORT;
+        if (PORT == null || PORT == "") {
+            PORT = 8000;
+        }
         server.listen(PORT, () => {
             console.log(`Server is started at port: ${PORT}`)
         })
+
+
     } catch (error) {
         console.log(error);
         process.exit(-1);

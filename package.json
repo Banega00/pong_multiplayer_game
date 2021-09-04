@@ -4,7 +4,7 @@
   "description": "This project is part of University course called \"Computer Networks\", attended at 5th semester of Undergraduate studies at University of Belgrade, Faculty of Organizational Sciences.",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch './**/*.ts' --exec ts-node main.ts",
+    "dev": "ts-node main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
