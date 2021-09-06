@@ -7,6 +7,7 @@ let animationFrameId;
 if (getGameId()) gotoGame();
 
 export let gameId;
+let lastTime = null;
 
 socket.on('game_id', (gId) => {
     gameId = gId;
@@ -99,13 +100,19 @@ function startGame() {
 }
 
 const animate = () => {
+
+    let now = new Date().getTime();
+    let dt = now - (lastTime ? lastTime : now);
+    lastTime = now;
+
+
     animationFrameId = window.requestAnimationFrame(animate);
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
     c.fillStyle = "#75b8eb";
     c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    balls.forEach(ball => ball.update());
+    balls.forEach(ball => ball.update(dt));
     players.forEach(player => player.update());
 
     // if (playerGameIndex === 1) {
@@ -124,7 +131,7 @@ socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
     console.log(winner);
-    
+
     players.forEach(player => {
         player.color = 'black';
     })
