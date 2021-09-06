@@ -1,5 +1,6 @@
 import { Socket } from "socket.io";
 import { uuid } from 'uuidv4';
+import Ball from "./game";
 
 export class SocketManager {
 
@@ -86,20 +87,22 @@ export class SocketManager {
                         maxDuration: 5,
                         currentDuration: 0,
                         maxPoints: 5,
-                        players: {
-                            player1: {
+                        players: [{
                                 name: senderName,
                                 socket: senderSocket,
                                 ready: false,
-                                points: 0
+                                points: 0,
+                                postion: {x:0, y:0},
+                                dimensions: {width:30, height: 100}
                             },
-                            player2: {
+                            {
                                 name: playerName,
                                 socket: socket,
                                 ready: false,
-                                points: 0
-                            }
-                        }
+                                points: 0,
+                                postion: {x:0, y:0},
+                                dimensions: {width:30, height: 100}
+                            }]
                     }
                     this.games.push(game)
                     socket.emit('game_id', game.id);
@@ -115,16 +118,16 @@ export class SocketManager {
             socket.on('ready_state', (readyState: boolean, gameConfig: any, gameId: string) => {
                 for (const game of this.games) {
                     if (game.id === gameId) {
-                        if (game.players.player1.socket.id === socket.id) {
+                        if (game.players[0].socket.id === socket.id) {
                             //first player pressed ready btn
                             //notify second player
-                            this.io.to(game.players.player2.socket.id).emit('ready_state', readyState)
-                            game.players.player1.ready = readyState
+                            this.io.to(game.players[1].socket.id).emit('ready_state', readyState)
+                            game.players[0].ready = readyState
                         } else {
                             //second player pressed ready btn
                             //notify first player
-                            this.io.to(game.players.player1.socket.id).emit('ready_state', readyState)
-                            game.players.player2.ready = readyState
+                            this.io.to(game.players[0].socket.id).emit('ready_state', readyState)
+                            game.players[1].ready = readyState
                         }
                         if (gameConfig.maxDuration) game.maxDuration = gameConfig.maxDuration * 60;//maxDuration converted from minutes to seconds
                         if (gameConfig.winningPoints) game.maxPoints = gameConfig.winningPoints
@@ -142,6 +145,13 @@ export class SocketManager {
             })
 
             socket.on('update_position', (x, y, index, gameId) => {
+                for(const game of this.games){
+                    if(game.id === gameId){
+                        game.players[index-1].postion = {x, y};
+                        
+                        break;
+                    }
+                }
                 this.io.in(gameId).emit('update_position', x, y, index);
             })
 
@@ -156,16 +166,16 @@ export class SocketManager {
                 for (const game of this.games) {
                     if (game.id = gameId) {
                         if (index === 1) {
-                            game.players.player1.points++;
+                            game.players[0].points++;
                         } else if (index === 2) {
-                            game.players.player2.points++;
+                            game.players[1].points++;
                         }
                     }
 
                     //
-                    if (game.players.player1.points >= game.maxPoints) {
+                    if (game.players[0].points >= game.maxPoints) {
                         this.endGame(game)
-                    } else if (game.players.player2.points >= game.maxPoints) {
+                    } else if (game.players[1].points >= game.maxPoints) {
                         this.endGame(game)
                     }
                 }
@@ -187,35 +197,50 @@ export class SocketManager {
 
         game.status = GameStatus.ACTIVE;
 
+        const ball = new Ball(10, 20 , 30, 'black');
+        ball.centerBall();
+
         game.maxDuration--;
 
-        let sec = 1000;//sec === 1000 msec
+        let interval = 10//10 msec
+        let secCoutner = 0;
         const gameInterval = setInterval(() => {
-            //send time report
+            secCoutner+=interval;
+            if(secCoutner === 1000){
+                secCoutner=0;
+                this.io.to(game.id).emit("time_report", game.maxDuration)
+                game.maxDuration--;
+            }
+
+            let {x,y} = ball.calculateNextPos();
+            ball.setPosition(x,y);
+            this.io.in(game.id).emit('update_ball_position',x,y);
+
+
             if (game.maxDuration <= 0) {
                 this.endGame(game, gameInterval);
                 clearInterval(gameInterval)
             };
-            this.io.to(game.id).emit("time_report", game.maxDuration)
-            game.maxDuration--;
-        }, sec)
+            
+        }, interval)
+
     }
 
     private endGame(game: Game, interval?: NodeJS.Timer) {
         game.status = GameStatus.FINISHED;
-        let player1Points = game.players.player1.points;
-        let player2Points = game.players.player2.points;
+        let player1Points = game.players[0].points;
+        let player2Points = game.players[1].points;
 
         let winner: any;
         if (player1Points > player2Points) {
             winner = {
-                name: game.players.player1.name,
-                points: game.players.player1.points
+                name: game.players[0].name,
+                points: game.players[0].points
             }
         } else if (player1Points < player2Points) {
             winner = {
-                name: game.players.player2.name,
-                points: game.players.player2.points
+                name: game.players[1].name,
+                points: game.players[1].points
             }
         } else {
             winner = null;
@@ -227,18 +252,18 @@ export class SocketManager {
         this.io.in(game.id).emit('end_game', winner);
 
         //remove sockets from room
-        game.players.player1.socket.leave(game.id)
-        game.players.player2.socket.leave(game.id)
+        game.players[0].socket.leave(game.id)
+        game.players[1].socket.leave(game.id)
 
         if (interval) clearInterval(interval);
     }
 
     private updatePlayersGame(player: Player) {
         for (const game of this.games) {
-            if (game.players.player1.name === player.playerName) {
-                game.players.player1.socket = player.socket
-            } else if (game.players.player2.name === player.playerName) {
-                game.players.player2.socket = player.socket
+            if (game.players[0].name === player.playerName) {
+                game.players[0].socket = player.socket
+            } else if (game.players[1].name === player.playerName) {
+                game.players[1].socket = player.socket
             }
         }
     }
@@ -286,26 +311,28 @@ enum PlayerStatus {
 
 //returns true if ready status of both players is true 
 function bothPlayersReady(game: Game): boolean {
-    return game.players.player1.ready && game.players.player2.ready
+    return game.players[0].ready && game.players[1].ready
 }
 
 interface Game {
     id: string,
     status: GameStatus,
-    players: {
-        player1: {
+    players: [{
             name: string,
             socket: Socket,
             ready: boolean,
-            points: number
+            points: number,
+            postion: {x:number, y:number},
+            dimensions: {width:number, height:number}
         },
-        player2: {
+        {
             name: string,
             socket: Socket,
-            ready: boolean
-            points: number
-        }
-    }
+            ready: boolean,
+            points: number,
+            postion: {x:number, y:number},
+            dimensions: {width:number, height:number}
+        }],
     maxDuration: number,
     currentDuration: number,
     maxPoints: number

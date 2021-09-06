@@ -118,13 +118,14 @@ const animate = () => {
 
 socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
+    balls.forEach(ball => ball.draw());
 })
 
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
     console.log(winner);
-    
+
     players.forEach(player => {
         player.color = 'black';
     })
