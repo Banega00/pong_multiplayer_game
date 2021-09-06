@@ -67,7 +67,7 @@ export default class Ball {
     update(dt) {
 
         const { speedX, speedY } = this.calculateNextPos();
-        this.x += speedX * (dt / );
+        this.x += speedX * (dt / 45);
         this.y += speedY * (dt / 45);
         this.draw();
     }
