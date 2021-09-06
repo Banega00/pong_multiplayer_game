@@ -53,7 +53,9 @@ const requestGame = (event, opponentName) => {
     const btn = event.target;
 
     //disable btn for 15 sec
+    console.log("STATUS:",btn.classList.contains('disabled-play-btn'))
     if (btn.classList.contains('disabled-play-btn')) return;
+    console.log("PROSAO DALJE")
     btn.classList.add('disabled-play-btn')
     setInterval(() => btn.classList.remove('disabled-play-btn'), 15000)
 
