@@ -214,8 +214,8 @@ export class SocketManager {
             }
         } else if (player1Points < player2Points) {
             winner = {
-                name: game.players.player1.name,
-                points: game.players.player1.points
+                name: game.players.player2.name,
+                points: game.players.player2.points
             }
         } else {
             winner = null;

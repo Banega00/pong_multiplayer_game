@@ -39,13 +39,10 @@ function writeMaxPoints(maxPoints) {
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 450;
 
-export const players = [
-    new Player(1, 'black'),
-    new Player(2, 'black')
+export let players = [
 ]
 
-const balls = [
-    new Ball(10, 20, 20, 'black')
+let balls = [
 ]
 
 export let canvasRect;
@@ -65,6 +62,14 @@ prepareGameScreen();
 
 
 function prepareGameScreen() {
+    balls = [];
+    players = [];
+    balls.push(new Ball(10, 20, 20, 'black'))
+    players.push(
+        new Player(1, 'black'),
+        new Player(2, 'black')
+    )
+
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
     c.fillStyle = "#75b8eb";
@@ -118,6 +123,8 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
+    console.log(winner);
+    
     players.forEach(player => {
         player.color = 'black';
     })
