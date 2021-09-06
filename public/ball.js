@@ -1,5 +1,5 @@
 import { CANVAS_WIDTH, CANVAS_HEIGHT, c, players, gameId } from "./game.js";
-import { socket } from "./index.js";
+import { playerGameIndex, socket } from "./index.js";
 export default class Ball {
     constructor(x, y, radius, color) {
         this.x = x;
@@ -78,13 +78,14 @@ export default class Ball {
 
     detectWalls() {
         if (this.x + this.radius >= CANVAS_WIDTH + 300) {
-            emitPoint(1)//player 1 gets the point
+            //only one player should emit 'point' event
+            if(playerGameIndex===1) emitPoint(1)//player 1 gets the point
             this.centerBall()
             this.speedX = -5;
             this.speedY = -5;
         }
         if (this.x - this.radius <= 0 - 300) {
-            emitPoint(2)//player 2 gets the point
+            if(playerGameIndex===1) emitPoint(2)//player 2 gets the point
             this.speedX = 5;
             this.speedY = -5;
             this.centerBall()

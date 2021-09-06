@@ -89,7 +89,7 @@ main{
 }
 
 html{
-    overflow: hidden;
+    overflow-y: hidden;
 }
 
 html, body {
