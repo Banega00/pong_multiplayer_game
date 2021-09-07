@@ -1,4 +1,5 @@
 export default class Ball {
+    
     public x:number;
     public y:number;
     public radius:number;
@@ -8,17 +9,48 @@ export default class Ball {
 
     public CANVAS_WIDTH:number;
     public CANVAS_HEIGHT:number;
+
+    public players = []
+
+    public canvasRect:{x:number, y:number};
     
-    constructor(x, y, radius, color) {
+    constructor(x, y, radius, color, canvasRect) {
         this.x = x;
         this.y = y;
         this.radius = radius;
+        this.canvasRect = canvasRect;
 
         this.centerBall();
         this.color = color;
 
         this.speedX = 5;
         this.speedY = 5;
+
+        this.CANVAS_WIDTH = 800;
+        this.CANVAS_HEIGHT = 450;
+
+        this.players.push({x: 0 , y: 0, width: 20 , height:100, index:1}, {x: 0 , y: 0, width: 20 , height:100, index:2})
+
+        this.players.forEach((player, i)=>{
+            this.centerPlayer(i);
+        })
+    }
+
+    public setPlayerPosition(x: number, y: number, i:number) {
+        if (y<= 0) {
+            this.players[i].y  = 0;
+        } else if (y + this.players[i].height  >= this.CANVAS_HEIGHT) {
+            this.players[i].y  = this.CANVAS_HEIGHT - this.players[i].height;
+        }else{
+            this.players[i].y = y - this.players[i].height / 2 - this.canvasRect.y;
+        }
+        // this.players[i].x = x;
+    }
+
+    centerPlayer(index) {
+        //player 1 is placed on left side and player 2 is placed on right
+        this.players[index].x = index == 0 ? 10 : this.CANVAS_WIDTH - this.players[index].width - 10
+        this.players[index].y = this.CANVAS_HEIGHT / 2 - this.players[index].height / 2
     }
 
     accelerate(absoluteSpeed) {
@@ -33,8 +65,8 @@ export default class Ball {
 
     calculateNextPos() {
         let x, y;
-        players.forEach(player => {
-            this.detectWalls()
+        this.players.forEach(player => {
+            this.detectWalls();
             //speedX moze da bude i pozitivan i negativ
             //kad je pozitivan i ideo od 0 do speedX
             //kad je negativan ide od speedX do 0
@@ -69,7 +101,6 @@ export default class Ball {
         const { x, y } = this.calculateNextPos();
         this.x = x;
         this.y = y;
-        this.draw();
     }
 
     setPosition(x, y) {
@@ -78,20 +109,17 @@ export default class Ball {
     }
 
     detectWalls() {
-        if (this.x + this.radius >= CANVAS_WIDTH + 300) {
-            //only one player should emit 'point' event
-            if(playerGameIndex===1) emitPoint(1)//player 1 gets the point
+        if (this.x + this.radius >= this.CANVAS_WIDTH + 300) {
             this.centerBall()
             this.speedX = -5;
             this.speedY = -5;
         }
         if (this.x - this.radius <= 0 - 300) {
-            if(playerGameIndex===1) emitPoint(2)//player 2 gets the point
             this.speedX = 5;
             this.speedY = -5;
             this.centerBall()
         }
-        if (this.y + this.radius >= CANVAS_HEIGHT) {
+        if (this.y + this.radius >= this.CANVAS_HEIGHT) {
             this.speedY = 0 - Math.abs(this.speedY);
         }
         if (this.y - this.radius <= 0) {
@@ -126,8 +154,3 @@ export default class Ball {
         return false;
     }
 }
-
-function emitPoint(index) {
-    socket.emit('point', index, gameId);
-}
-

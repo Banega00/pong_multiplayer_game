@@ -371,10 +371,15 @@ const sendReadyState = (readyState) => {
         gameConfig.player2Color = colorPickers[1].value;
     }
 
-    socket.emit('ready_state', readyState, gameConfig, getGameId());
+    const canvas = document.querySelector('canvas');
+    let canvasRect = canvas.getBoundingClientRect();
+
+    socket.emit('ready_state', readyState, gameConfig, getGameId(), {x:canvasRect.x, y:canvasRect.y});
 }
 
 socket.on('ready_state', readyState => {
+   
+
     const readyBtn = document.querySelector('.ready-btn:not(.your-btn)');
     if (readyState) {
         readyBtn.classList.remove('unready');

@@ -115,7 +115,7 @@ export class SocketManager {
                 socket.to(senderSocket.id).emit('game_response', response, playerName, socket.id);
             })
 
-            socket.on('ready_state', (readyState: boolean, gameConfig: any, gameId: string) => {
+            socket.on('ready_state', (readyState: boolean, gameConfig: any, gameId: string, canvasRect:{x:number, y:number}) => {
                 for (const game of this.games) {
                     if (game.id === gameId) {
                         if (game.players[0].socket.id === socket.id) {
@@ -133,7 +133,7 @@ export class SocketManager {
                         if (gameConfig.winningPoints) game.maxPoints = gameConfig.winningPoints
                         if (bothPlayersReady(game)) {
                             this.io.to(game.id).emit('game_started', game.maxPoints)
-                            this.startGame(game);
+                            this.startGame(game,canvasRect);
                         }
                         break;
                     }
@@ -145,13 +145,7 @@ export class SocketManager {
             })
 
             socket.on('update_position', (x, y, index, gameId) => {
-                for(const game of this.games){
-                    if(game.id === gameId){
-                        game.players[index-1].postion = {x, y};
-                        
-                        break;
-                    }
-                }
+                
                 this.io.in(gameId).emit('update_position', x, y, index);
             })
 
@@ -193,34 +187,41 @@ export class SocketManager {
         }
     }
 
-    private startGame(game: Game) {
+    private startGame(game: Game, canvasRect:{x:number, y:number}) {
 
         game.status = GameStatus.ACTIVE;
 
-        const ball = new Ball(10, 20 , 30, 'black');
+        const ball = new Ball(10, 20 , 30, 'black', canvasRect);
         ball.centerBall();
+
+        game.players[0].socket.on('update_position', (x,y,index)=>{
+            ball.setPlayerPosition(x,y,0);
+        })
+
+        game.players[1].socket.on('update_position', (x,y,index)=>{
+            ball.setPlayerPosition(x,y,1);
+        })
 
         game.maxDuration--;
 
-        let interval = 10//10 msec
-        let secCoutner = 0;
+        let interval = 19//10 msec
         const gameInterval = setInterval(() => {
-            secCoutner+=interval;
-            if(secCoutner === 1000){
-                secCoutner=0;
-                this.io.to(game.id).emit("time_report", game.maxDuration)
-                game.maxDuration--;
-            }
+            // secCoutner+=interval;
+            // if(secCoutner === 1000){
+            //     secCoutner=0;
+            //     this.io.to(game.id).emit("time_report", game.maxDuration)
+            //     game.maxDuration--;
+            // }
 
             let {x,y} = ball.calculateNextPos();
             ball.setPosition(x,y);
             this.io.in(game.id).emit('update_ball_position',x,y);
 
 
-            if (game.maxDuration <= 0) {
-                this.endGame(game, gameInterval);
-                clearInterval(gameInterval)
-            };
+            // if (game.maxDuration <= 0) {
+            //     this.endGame(game, gameInterval);
+            //     clearInterval(gameInterval)
+            // };
             
         }, interval)
 

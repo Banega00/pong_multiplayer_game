@@ -99,14 +99,14 @@ function startGame() {
 }
 
 const animate = () => {
-    animationFrameId = window.requestAnimationFrame(animate);
-    c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+    // animationFrameId = window.requestAnimationFrame(animate);
+    // c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
-    c.fillStyle = "#75b8eb";
-    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // c.fillStyle = "#75b8eb";
+    // c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    balls.forEach(ball => ball.update());
-    players.forEach(player => player.update());
+    // balls.forEach(ball => ball.update());
+    // players.forEach(player => player.update());
 
     // if (playerGameIndex === 1) {
     //     balls.forEach(ball => {
@@ -118,6 +118,15 @@ const animate = () => {
 
 socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
+
+    c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+
+    c.fillStyle = "#75b8eb";
+    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // balls.forEach(ball => ball.update());
+    players.forEach(player => player.update());
+
     balls.forEach(ball => ball.draw());
 })
 
