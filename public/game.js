@@ -29,7 +29,6 @@ socket.on('time_report', seconds => {
 
 socket.on('game_started', (maxPoints) => {
     writeMaxPoints(maxPoints);
-    startGame()
 })
 
 function writeMaxPoints(maxPoints) {
@@ -57,10 +56,6 @@ c = canvas.getContext('2d')
 prepareGameScreen();
 
 
-
-
-
-
 function prepareGameScreen() {
     balls = [];
     players = [];
@@ -70,17 +65,21 @@ function prepareGameScreen() {
         new Player(2, 'black')
     )
 
+    paintScreen();
+
+    players.forEach(player => console.log(`${player.x},${player.y}`))
+}
+
+function paintScreen(){
     c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
 
     c.fillStyle = "#75b8eb";
     c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     balls.forEach(ball => {
-        ball.centerBall()
         ball.draw();
     });
     players.forEach(player => {
-        player.positionPlayer();
         player.draw();
     })
 }
@@ -89,45 +88,10 @@ function changePlayerColor(color, index) {
     players[index - 1]?.changeColor(color);
 }
 
-function startGame() {
-    // balls.forEach(ball => {
-    //     ball.centerBall()
-    //     setInterval(() => ball.accelerate(0.5), 2000)
-    // });
-    players.forEach(player => player.positionPlayer())
-    animate();
-}
-
-const animate = () => {
-    // animationFrameId = window.requestAnimationFrame(animate);
-    // c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
-
-    // c.fillStyle = "#75b8eb";
-    // c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // balls.forEach(ball => ball.update());
-    // players.forEach(player => player.update());
-
-    // if (playerGameIndex === 1) {
-    //     balls.forEach(ball => {
-    //         let { x, y } = ball.calculateNextPos();
-    //         socket.emit('update_ball_position', x, y, gameId)
-    //     });
-    // }
-}
-
 socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
 
-    c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
-
-    c.fillStyle = "#75b8eb";
-    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // balls.forEach(ball => ball.update());
-    players.forEach(player => player.update());
-
-    balls.forEach(ball => ball.draw());
+    paintScreen();
 })
 
 socket.on('point', index => incrementPoint(index))

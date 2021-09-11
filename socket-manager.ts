@@ -144,11 +144,6 @@ export class SocketManager {
                 this.io.to(gameId).emit('color_change', color, index);
             })
 
-            socket.on('update_position', (x, y, index, gameId) => {
-                
-                this.io.in(gameId).emit('update_position', x, y, index);
-            })
-
             socket.on('update_ball_position', (x, y, gameId) => {
                 this.io.in(gameId).emit('update_ball_position', x, y);
             })
@@ -191,15 +186,16 @@ export class SocketManager {
 
         game.status = GameStatus.ACTIVE;
 
-        const ball = new Ball(10, 20 , 30, 'black', canvasRect);
-        ball.centerBall();
+        const ball = new Ball(20, 'black', canvasRect);
 
         game.players[0].socket.on('update_position', (x,y,index)=>{
-            ball.setPlayerPosition(x,y,0);
+            const {playerX, playerY} = ball.setPlayerPosition(x,y,0);
+            this.io.in(game.id).emit('update_position',playerX, playerY,0);
         })
 
         game.players[1].socket.on('update_position', (x,y,index)=>{
-            ball.setPlayerPosition(x,y,1);
+            const {playerX, playerY} = ball.setPlayerPosition(x,y,1);
+            this.io.in(game.id).emit('update_position',playerX, playerY,1);
         })
 
         game.maxDuration--;

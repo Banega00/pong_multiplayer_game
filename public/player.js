@@ -19,13 +19,13 @@ export default class Player {
 
     draw() {
         c.fillStyle = this.color;
-        c.fillRect(this.x, this.y, this.width, this.height);
+        c.fillRect(this.x, this.y-this.height/2, this.width, this.height);
     }
 
     centerPlayer(index) {
         //player 1 is placed on left side and player 2 is placed on right
         this.x = this.index == 1 ? 10 : CANVAS_WIDTH - this.width - 10
-        this.y = CANVAS_HEIGHT / 2 - this.height / 2
+        this.y = CANVAS_HEIGHT / 2
     }
 
     moveUp() {
@@ -45,20 +45,8 @@ export default class Player {
     }
 
     update() {
-        this.detectWalls();
         this.y += this.speedY;
         this.draw();
-    }
-
-    detectWalls() {
-
-        if (this.y + this.speedY <= 0) {
-            this.y = 0;
-            this.speedY = 0;
-        } else if (this.y + this.height + this.speedY >= CANVAS_HEIGHT) {
-            this.y = CANVAS_HEIGHT - this.height;
-            this.speedY = 0;
-        }
     }
 
     positionPlayer() {
@@ -67,7 +55,8 @@ export default class Player {
     }
 
     updatePosition(x, y) {
-        this.y = y - this.height / 2;
+        console.log(y);
+        this.y = y;
     }
 
     changeColor(color) {
@@ -76,15 +65,15 @@ export default class Player {
     }
 }
 
-window.addEventListener('mousemove', (event) => updatePoistion(event));
+window.addEventListener('mousemove', (event) => updatePosition(event));
 
-function updatePoistion(event) {
+function updatePosition(event) {
     if (gameId)
         socket.emit('update_position', event.clientX - canvasRect.x, event.clientY - canvasRect.y, playerGameIndex, gameId);
 }       //calculated offset from canvas element
 
 socket.on('update_position', (x, y, index) => {
-    players[index - 1].updatePosition(x, y);
+    players[index].updatePosition(x, y);
 })
 
 

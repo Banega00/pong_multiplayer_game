@@ -14,9 +14,10 @@ export default class Ball {
 
     public canvasRect:{x:number, y:number};
     
-    constructor(x, y, radius, color, canvasRect) {
-        this.x = x;
-        this.y = y;
+    constructor(radius, color, canvasRect) {
+        this.CANVAS_WIDTH = 800;
+        this.CANVAS_HEIGHT = 450;
+
         this.radius = radius;
         this.canvasRect = canvasRect;
 
@@ -26,12 +27,10 @@ export default class Ball {
         this.speedX = 5;
         this.speedY = 5;
 
-        this.CANVAS_WIDTH = 800;
-        this.CANVAS_HEIGHT = 450;
 
         this.players.push({x: 0 , y: 0, width: 20 , height:100, index:1}, {x: 0 , y: 0, width: 20 , height:100, index:2})
         this.players.forEach((player, i)=>{
-            this.centerPlayer(i);
+            this.centerPlayer(player, i);
         })
     }
 
@@ -45,17 +44,17 @@ export default class Ball {
         }else{
             player.y = y;
         }
+        return {playerX: player.x, playerY: player.y}
         // this.players[i].x = x;
     }
 
-    centerPlayer(index) {
+    centerPlayer(player, index) {
         //player 1 is placed on left side and player 2 is placed on right
-        this.players[index].x = index == 0 ? 10 : this.CANVAS_WIDTH - this.players[index].width - 10
-        this.players[index].y = this.CANVAS_HEIGHT / 2;
+        player.x = index == 0 ? 10 : this.CANVAS_WIDTH - this.players[index].width - 10
+        player.y = this.CANVAS_HEIGHT / 2;
     }
 
     accelerate(absoluteSpeed) {
-        console.log(absoluteSpeed)
         this.speedX = this.speedX >= 0 ? this.speedX + absoluteSpeed : this.speedX - absoluteSpeed
     }
 
@@ -76,7 +75,7 @@ export default class Ball {
                     let collision = this.detectPlayer(player, i)
                     if (collision) {
                         this.speedX *= -1;
-                        this.speedX += this.speedX > 0 ? 0.5 : -0.5;
+                        this.accelerate(0.5);
                         return;
                     }
                 }
@@ -85,7 +84,7 @@ export default class Ball {
                     let collision = this.detectPlayer(player, i)
                     if (collision) {
                         this.speedX *= -1;
-                        this.speedX += this.speedX > 0 ? 0.5 : -0.5;
+                        this.accelerate(0.5);
                         return;
                     }
                 }
