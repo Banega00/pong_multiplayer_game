@@ -30,19 +30,20 @@ export default class Ball {
         this.CANVAS_HEIGHT = 450;
 
         this.players.push({x: 0 , y: 0, width: 20 , height:100, index:1}, {x: 0 , y: 0, width: 20 , height:100, index:2})
-
         this.players.forEach((player, i)=>{
             this.centerPlayer(i);
         })
     }
 
     public setPlayerPosition(x: number, y: number, i:number) {
-        if (y<= 0) {
-            this.players[i].y  = 0;
-        } else if (y + this.players[i].height  >= this.CANVAS_HEIGHT) {
-            this.players[i].y  = this.CANVAS_HEIGHT - this.players[i].height;
+        //canvas element offset is calculated
+        const player =  this.players[i];
+        if(y < player.height/2){
+            player.y = player.height/2;
+        }else if(y + player.height/2 > this.CANVAS_HEIGHT ){
+            player.y = this.CANVAS_HEIGHT - player.height/2;
         }else{
-            this.players[i].y = y - this.players[i].height / 2 - this.canvasRect.y;
+            player.y = y;
         }
         // this.players[i].x = x;
     }
@@ -50,7 +51,7 @@ export default class Ball {
     centerPlayer(index) {
         //player 1 is placed on left side and player 2 is placed on right
         this.players[index].x = index == 0 ? 10 : this.CANVAS_WIDTH - this.players[index].width - 10
-        this.players[index].y = this.CANVAS_HEIGHT / 2 - this.players[index].height / 2
+        this.players[index].y = this.CANVAS_HEIGHT / 2;
     }
 
     accelerate(absoluteSpeed) {
@@ -133,18 +134,18 @@ export default class Ball {
             y: this.y + speed
         }
 
-
+        //player.y is y coord of CENTER of player
         if (player.index === 1) {
-            if (newPos.y >= player.y &&
-                newPos.y <= player.y + player.height &&
+            if (newPos.y >= player.y - player.height/2 &&
+                newPos.y <= player.y - player.height/2 + player.height &&
                 newPos.x <= player.x + player.width &&
                 newPos.x >= player.x) {
                 return true;
             }
 
         } else if (player.index === 2) {
-            if (this.y >= player.y &&
-                this.y <= player.y + player.height &&
+            if (this.y >= player.y - player.height/2 &&
+                this.y <= player.y - player.height/2 + player.height &&
                 this.x >= player.x &&
                 this.x <= player.x + player.width) {
                 return true;

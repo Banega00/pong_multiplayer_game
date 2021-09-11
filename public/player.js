@@ -67,7 +67,7 @@ export default class Player {
     }
 
     updatePosition(x, y) {
-        this.y = y - this.height / 2 - canvasRect.y;
+        this.y = y - this.height / 2;
     }
 
     changeColor(color) {
@@ -80,8 +80,8 @@ window.addEventListener('mousemove', (event) => updatePoistion(event));
 
 function updatePoistion(event) {
     if (gameId)
-        socket.emit('update_position', event.clientX, event.clientY, playerGameIndex, gameId);
-}
+        socket.emit('update_position', event.clientX - canvasRect.x, event.clientY - canvasRect.y, playerGameIndex, gameId);
+}       //calculated offset from canvas element
 
 socket.on('update_position', (x, y, index) => {
     players[index - 1].updatePosition(x, y);
