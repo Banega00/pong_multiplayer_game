@@ -186,7 +186,7 @@ export class SocketManager {
 
         game.status = GameStatus.ACTIVE;
 
-        const ball = new Ball(20, 'black', canvasRect);
+        const ball = new Ball(20, 'black', canvasRect, game);
 
         game.players[0].socket.on('update_position', (x,y,index)=>{
             const {playerX, playerY} = ball.setPlayerPosition(x,y,0);
@@ -220,6 +220,8 @@ export class SocketManager {
             // };
             
         }, interval)
+
+        ball.gameInterval = gameInterval;
 
     }
 
@@ -311,7 +313,7 @@ function bothPlayersReady(game: Game): boolean {
     return game.players[0].ready && game.players[1].ready
 }
 
-interface Game {
+export interface Game {
     id: string,
     status: GameStatus,
     players: [{

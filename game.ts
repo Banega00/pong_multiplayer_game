@@ -1,3 +1,5 @@
+import { Game } from "./socket-manager";
+
 export default class Ball {
     
     public x:number;
@@ -9,14 +11,21 @@ export default class Ball {
 
     public CANVAS_WIDTH:number;
     public CANVAS_HEIGHT:number;
+    private game:Game;
+    private _gameInterval:NodeJS.Timer;
+
+    set gameInterval(_gameInterval){
+        this._gameInterval = _gameInterval;
+    }
 
     public players = []
 
     public canvasRect:{x:number, y:number};
     
-    constructor(radius, color, canvasRect) {
+    constructor(radius, color, canvasRect, game:Game) {
         this.CANVAS_WIDTH = 800;
         this.CANVAS_HEIGHT = 450;
+        this.game = game;
 
         this.radius = radius;
         this.canvasRect = canvasRect;
@@ -108,9 +117,27 @@ export default class Ball {
         this.y = y;
     }
 
+    emitPoint(playerIndex){
+        this.game.players.forEach(player =>{
+            player.socket.emit('point', playerIndex)
+        })
+
+        this.game.players[playerIndex].points++;//increment points of player who scored
+
+        if(this.game.players[playerIndex].points >= this.game.maxPoints){
+            //if points limit is reached - emit end_game event
+            this.game.players.forEach(player =>{
+                player.socket.emit('end_game', {name: this.game.players[playerIndex].name})
+            })
+
+            clearInterval(this._gameInterval); //clear interval when game is done
+        }
+    }
+
     detectWalls() {
         if (this.x + this.radius >= this.CANVAS_WIDTH + 300) {
             this.centerBall()
+            this.emitPoint(0);//player 1 gets point
             this.speedX = -5;
             this.speedY = -5;
         }
@@ -118,6 +145,7 @@ export default class Ball {
             this.speedX = 5;
             this.speedY = -5;
             this.centerBall()
+            this.emitPoint(1);//player 2 gets point
         }
         if (this.y + this.radius >= this.CANVAS_HEIGHT) {
             this.speedY = 0 - Math.abs(this.speedY);

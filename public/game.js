@@ -17,7 +17,7 @@ socket.on('game_id', (gId) => {
 socket.on('color_change', (color, index) => {
     changePlayerColor(color, index);
     changePlayerColorInputs(color, index);
-    prepareGameScreen();
+    paintScreen();
 })
 
 socket.on('time_report', seconds => {
@@ -66,8 +66,6 @@ function prepareGameScreen() {
     )
 
     paintScreen();
-
-    players.forEach(player => console.log(`${player.x},${player.y}`))
 }
 
 function paintScreen(){
@@ -97,17 +95,10 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
-    console.log(winner);
-
-    players.forEach(player => {
-        player.color = 'black';
-    })
-
     showEndOfGameDiv(winner)
 
     //reset clock
     document.querySelector('#clock').innerText = '5:00';
-
 
     window.sessionStorage.removeItem('gameId')
 
@@ -133,7 +124,7 @@ function showEndOfGameDiv(winner) {
 }
 
 function incrementPoint(index) {
-    let h = document.querySelectorAll('.player .points')[index - 1];
+    let h = document.querySelectorAll('.player .points')[index];
     let points = h.innerText;
     points = parseInt(points);
     points++;
