@@ -1,8 +1,10 @@
-import Player from "./player.js";
+import Player, { updatePosition } from "./player.js";
 import Ball from "./ball.js"
 
 import { socket, changePlayerColorInputs, gotoGame, getGameId, playerGameIndex, gotoLobby, playerName } from './index.js'
 let animationFrameId;
+
+export let IN_GAME = false;//flag that says if game is in progress;
 
 if (getGameId()) gotoGame();
 
@@ -29,6 +31,8 @@ socket.on('time_report', seconds => {
 
 socket.on('game_started', (maxPoints) => {
     writeMaxPoints(maxPoints);
+    window.addEventListener('mousemove', updatePosition);
+    IN_GAME = true;
 })
 
 function writeMaxPoints(maxPoints) {
@@ -95,8 +99,9 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
+    IN_GAME = false;
     showEndOfGameDiv(winner)
-
+    window.removeEventListener('mousemove', updatePosition);
     //reset clock
     document.querySelector('#clock').innerText = '5:00';
 

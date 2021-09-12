@@ -65,10 +65,9 @@ export default class Player {
     }
 }
 
-window.addEventListener('mousemove', (event) => updatePosition(event));
 
-function updatePosition(event) {
-    if (gameId)
+export function updatePosition(event) {
+    if(gameId)
         socket.emit('update_position', event.clientX - canvasRect.x, event.clientY - canvasRect.y, playerGameIndex, gameId);
 }       //calculated offset from canvas element
 

@@ -118,6 +118,7 @@ export class SocketManager {
             socket.on('ready_state', (readyState: boolean, gameConfig: any, gameId: string, canvasRect:{x:number, y:number}) => {
                 for (const game of this.games) {
                     if (game.id === gameId) {
+                        if(game.status == GameStatus.ACTIVE) return;
                         if (game.players[0].socket.id === socket.id) {
                             //first player pressed ready btn
                             //notify second player
@@ -146,28 +147,6 @@ export class SocketManager {
 
             socket.on('update_ball_position', (x, y, gameId) => {
                 this.io.in(gameId).emit('update_ball_position', x, y);
-            })
-
-            socket.on('point', (index, gameId) => {
-                this.io.in(gameId).emit('point', index);
-
-                //update game points
-                for (const game of this.games) {
-                    if (game.id = gameId) {
-                        if (index === 1) {
-                            game.players[0].points++;
-                        } else if (index === 2) {
-                            game.players[1].points++;
-                        }
-                    }
-
-                    //
-                    if (game.players[0].points >= game.maxPoints) {
-                        this.endGame(game)
-                    } else if (game.players[1].points >= game.maxPoints) {
-                        this.endGame(game)
-                    }
-                }
             })
         })
     }
@@ -198,63 +177,32 @@ export class SocketManager {
             this.io.in(game.id).emit('update_position',playerX, playerY,1);
         })
 
-        game.maxDuration--;
+        game.maxDuration++;
+
+        let previousDate = new Date().getTime(), currentDate;
 
         let interval = 19//10 msec
         const gameInterval = setInterval(() => {
-            // secCoutner+=interval;
-            // if(secCoutner === 1000){
-            //     secCoutner=0;
-            //     this.io.to(game.id).emit("time_report", game.maxDuration)
-            //     game.maxDuration--;
-            // }
+            currentDate = new Date().getTime();
+            
+            
+            if(currentDate - previousDate >= 1000){
+                game.maxDuration -= (currentDate - previousDate) / 1000;
+                previousDate = currentDate;
+                this.io.to(game.id).emit("time_report", Math.floor(game.maxDuration))
+
+                if(game.maxDuration <= 0){
+                    ball.endGame();
+                }
+            }
 
             let {x,y} = ball.calculateNextPos();
             ball.setPosition(x,y);
             this.io.in(game.id).emit('update_ball_position',x,y);
-
-
-            // if (game.maxDuration <= 0) {
-            //     this.endGame(game, gameInterval);
-            //     clearInterval(gameInterval)
-            // };
-            
         }, interval)
 
         ball.gameInterval = gameInterval;
 
-    }
-
-    private endGame(game: Game, interval?: NodeJS.Timer) {
-        game.status = GameStatus.FINISHED;
-        let player1Points = game.players[0].points;
-        let player2Points = game.players[1].points;
-
-        let winner: any;
-        if (player1Points > player2Points) {
-            winner = {
-                name: game.players[0].name,
-                points: game.players[0].points
-            }
-        } else if (player1Points < player2Points) {
-            winner = {
-                name: game.players[1].name,
-                points: game.players[1].points
-            }
-        } else {
-            winner = null;
-        }
-        //remove game from array;
-        this.games = this.games.filter(g => g.id != game.id);
-
-        //emit end game_event
-        this.io.in(game.id).emit('end_game', winner);
-
-        //remove sockets from room
-        game.players[0].socket.leave(game.id)
-        game.players[1].socket.leave(game.id)
-
-        if (interval) clearInterval(interval);
     }
 
     private updatePlayersGame(player: Player) {
@@ -337,7 +285,7 @@ export interface Game {
     maxPoints: number
 }
 
-enum GameStatus {
+export enum GameStatus {
     ACTIVE = 'ACTIVE',
     FINISHED = 'FINISHED',
     PREPARING = 'PREPARING'

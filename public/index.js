@@ -1,4 +1,3 @@
-
 export const socket = io('http://localhost:8000', {
     'sync disconnect on unload': true
 });
@@ -349,9 +348,7 @@ export const changeReadyBtnState = (btn) => {
     } else if (btn.classList.contains('unready')) {
         btn.classList.remove('unready')
         btn.classList.add('ready')
-
         sendReadyState(true, getGameId());
-
     }
 }
 
@@ -363,7 +360,7 @@ const sendReadyState = (readyState) => {
         gameConfig.player1Color = colorPickers[0].value;
 
         let maxDuration = document.querySelector('.max-duration').value;
-        gameConfig.maxDuration = (maxDuration > 1 && maxDuration <= 20) ? maxDuration : 5;
+        gameConfig.maxDuration = (maxDuration >= 1 && maxDuration <= 20) ? maxDuration : 5;
 
         let winningPoints = document.querySelector('.winning-points').value;
         gameConfig.winningPoints = (winningPoints >= 1 && winningPoints <= 30) ? winningPoints : 5;

@@ -1,7 +1,6 @@
-import { Game } from "./socket-manager";
+import { Game, GameStatus } from "./socket-manager";
 
 export default class Ball {
-    
     public x:number;
     public y:number;
     public radius:number;
@@ -125,12 +124,7 @@ export default class Ball {
         this.game.players[playerIndex].points++;//increment points of player who scored
 
         if(this.game.players[playerIndex].points >= this.game.maxPoints){
-            //if points limit is reached - emit end_game event
-            this.game.players.forEach(player =>{
-                player.socket.emit('end_game', {name: this.game.players[playerIndex].name})
-            })
-
-            clearInterval(this._gameInterval); //clear interval when game is done
+            this.endGame();
         }
     }
 
@@ -180,5 +174,24 @@ export default class Ball {
         }
 
         return false;
+    }
+
+    endGame() {
+        clearInterval(this.gameInterval)
+        let winner = null;
+
+        //determine the winner
+        if(this.game.players[0].points > this.game.players[1].points){
+            winner = {name: this.game.players[0].name}//player 1 wins
+        }else if(this.game.players[0].points < this.game.players[1].points){
+            winner = {name: this.game.players[1].name}//player 2 win
+        }
+ 
+        //if points limit is reached - emit end_game event
+        this.game.players.forEach(player =>{
+            player.socket.emit('end_game', winner)
+        })
+        this.game.status = GameStatus.FINISHED;
+        clearInterval(this._gameInterval); //clear interval when game is done
     }
 }
