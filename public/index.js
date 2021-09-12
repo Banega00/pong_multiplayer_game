@@ -52,9 +52,7 @@ const requestGame = (event, opponentName) => {
     const btn = event.target;
 
     //disable btn for 15 sec
-    console.log("STATUS:",btn.classList.contains('disabled-play-btn'))
     if (btn.classList.contains('disabled-play-btn')) return;
-    console.log("PROSAO DALJE")
     btn.classList.add('disabled-play-btn')
     setInterval(() => btn.classList.remove('disabled-play-btn'), 15000)
 
@@ -74,7 +72,7 @@ socket.on('game_request', (senderName) => {
                 <div></div>
             </div>
             <div class="game-request-div-inner">
-                Player ${senderName} invited you for a game!
+                <div>Player <span class="playerName">${senderName}</span> invited you for a game!</div>
                 <div class="game-btns">
                     <div class="accept-game-btn">${checkMark}</div>
                     <div class="decline-game-btn">${xMark}</div>
@@ -112,7 +110,7 @@ export function gotoGame() {
 
 export function gotoLobby() {
     setStatus(playerName, 1)
-    const endOfGameDiv = document.querySelector('.end-of-game-div');
+    const endOfGameDiv = document.querySelector('.end-game-background-cover');
     endOfGameDiv.remove();
 
     gameContainer.classList.remove('open');

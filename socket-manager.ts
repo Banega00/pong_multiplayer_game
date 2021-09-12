@@ -193,6 +193,9 @@ export class SocketManager {
 
                 if(game.maxDuration <= 0){
                     ball.endGame();
+                    game.players.forEach(player =>{
+                        player.socket.leave(game.id);
+                    })
                 }
             }
 
@@ -200,9 +203,7 @@ export class SocketManager {
             ball.setPosition(x,y);
             this.io.in(game.id).emit('update_ball_position',x,y);
         }, interval)
-
         ball.gameInterval = gameInterval;
-
     }
 
     private updatePlayersGame(player: Player) {

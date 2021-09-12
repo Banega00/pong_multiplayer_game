@@ -21,7 +21,6 @@ export default class Ball {
     }
 
     accelerate(absoluteSpeed) {
-        console.log(absoluteSpeed)
         this.speedX = this.speedX >= 0 ? this.speedX + absoluteSpeed : this.speedX - absoluteSpeed
     }
 

@@ -49,6 +49,7 @@ main{
 .playerName{
     color: rgb(24, 226, 149);
     font-size: 1.3em;
+    width: fit-content;
 }
 
 .players-lobby{
@@ -289,6 +290,16 @@ body{
     justify-content: space-between;
     padding: 10px 20px;
     align-items: center;
+}
+
+.end-game-background-cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    z-index: 5;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.568);
 }
 
 .end-of-game-div > * {

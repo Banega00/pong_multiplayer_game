@@ -125,6 +125,9 @@ export default class Ball {
 
         if(this.game.players[playerIndex].points >= this.game.maxPoints){
             this.endGame();
+            this.game.players.forEach(player =>{
+                player.socket.leave(this.game.id);
+            })
         }
     }
 

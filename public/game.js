@@ -115,13 +115,15 @@ socket.on('end_game', winner => {
 function showEndOfGameDiv(winner) {
     let message;
     if (!winner) message = `GAME TIED`;
-    else if (winner.name == playerName) message = "CONGRATULATIONS YOU WON"
-    else message = `YOU LOSE :( \n PLAYER ${winner.name} WON`
+    else if (winner.name == playerName) message = "CONGRATULATIONS <span class='playerName'>YOU</span> WON"
+    else message = `YOU LOSE :( \n PLAYER <span class="playerName">${winner.name} </span>WON`
     const div = `
-    <div class="end-of-game-div">
-        <div>${message}</div>
-        <div>
-            <div class="back-to-lobby-btn">Back to lobby</div>
+    <div class="end-game-background-cover">
+        <div class="end-of-game-div">
+            <div>${message}</div>
+            <div>
+                <div class="back-to-lobby-btn">Back to lobby</div>
+            </div>
         </div>
     </div>`
     document.body.insertAdjacentHTML('beforeend', div);

@@ -55,7 +55,6 @@ export default class Player {
     }
 
     updatePosition(x, y) {
-        console.log(y);
         this.y = y;
     }
 
