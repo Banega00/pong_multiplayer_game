@@ -8,4 +8,4 @@ If he accept your request game will start.
 
 Game is **deployed** on **Heroku** platform 
 
-Here is link - - ENJOY! 
+Here is link - https://pong-multiplayer-game-rmt.herokuapp.com/login.html - ENJOY! 
