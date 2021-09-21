@@ -12,6 +12,7 @@ You can send game request to another online player.
 If he accept your request game will start.
 
 Game is **deployed** via **Heroku** platform 
+
 ![image-log-in](https://user-images.githubusercontent.com/44339816/134213230-1e6e9e7b-09bc-4265-be50-bf07cd53d0df.png | width=400)
 
 
