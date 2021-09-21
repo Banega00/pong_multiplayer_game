@@ -5,3 +5,7 @@ Game is multiplayer.
 When you log in - you enters the lobby and can see other online players.
 You can send game request to another online player.
 If he accept your request game will start.
+
+Game is **deployed** on **Heroku** platform 
+
+Here is link - - ENJOY! 
