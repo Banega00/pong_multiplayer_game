@@ -6,6 +6,7 @@ import { SocketManager } from './socket-manager';
 
 (async function main() {
     try {
+        //connecting to database
 
         //instantiating server
         const server = http.createServer(App);
