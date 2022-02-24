@@ -44,3 +44,4 @@ Server is implemented using NodeJS runtime. Most important libraries are:
 * **express** 
 * **mongoose**
 * **socket.io**.
+Also Typescript was used on server side to assure additional type safety.
