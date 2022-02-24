@@ -5,7 +5,7 @@ const submitName = async () => {
     if (!nameInput.value) return alert('Name cannot be empty')
 
     try {
-        let response = await fetch("https://pong-multiplayer-game-rmt.herokuapp.com/login", {
+        let response = await fetch("https://pong-multiplayer-live.herokuapp.com/login", {
             method: 'POST',
             mode: 'cors',
             headers: {
@@ -19,7 +19,7 @@ const submitName = async () => {
         console.log(response);
 
         sessionStorage.setItem('name', nameInput.value)
-        window.location = "https://pong-multiplayer-game-rmt.herokuapp.com/index.html"
+        window.location = "https://pong-multiplayer-live.herokuapp.com/index.html"
     } catch (error) {
         console.log(error);
     }

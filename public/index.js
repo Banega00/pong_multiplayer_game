@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> master
-export const socket = io('https://pong-multiplayer-game-rmt.herokuapp.com', {
+export const socket = io('https://pong-multiplayer-live.herokuapp.com', {
     'sync disconnect on unload': true
 });
 
@@ -21,7 +17,7 @@ export let playerGameIndex;
 export const gameContainer = document.querySelector('#game-container')
 
 if (!playerName) {
-    window.location = 'https://pong-multiplayer-game-rmt.herokuapp.com/login.html'
+    window.location = 'https://pong-multiplayer-live.herokuapp.com/login.html'
 }
 
 socket.on('connect', () => {
@@ -56,10 +52,7 @@ const requestGame = (event, opponentName) => {
     const btn = event.target;
 
     //disable btn for 15 sec
-<<<<<<< HEAD
-=======
     console.log("STATUS:", btn.classList.contains('disabled-play-btn'))
->>>>>>> master
     if (btn.classList.contains('disabled-play-btn')) return;
     btn.classList.add('disabled-play-btn')
     setInterval(() => btn.classList.remove('disabled-play-btn'), 15000)
@@ -307,7 +300,7 @@ const startTimer = (gameRequestDiv) => {
 }
 socket.on('username_taken', () => {
     alert('Username is already taken!')
-    window.location = "https://pong-multiplayer-game-rmt.herokuapp.com/login.html"
+    window.location = "https://pong-multiplayer-live.herokuapp.com/login.html"
 })
 
 socket.on('player_left', (playerName) => {
