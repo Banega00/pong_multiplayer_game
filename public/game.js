@@ -91,8 +91,6 @@ function changePlayerColor(color, index) {
     players[index - 1]?.changeColor(color);
 }
 
-<<<<<<< HEAD
-=======
 function startGame() {
     // balls.forEach(ball => {
     //     ball.centerBall()
@@ -126,7 +124,6 @@ const animate = () => {
     // }
 }
 
->>>>>>> master
 socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
 
@@ -136,16 +133,13 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
-<<<<<<< HEAD
     IN_GAME = false;
-=======
     console.log(winner);
 
     players.forEach(player => {
         player.color = 'black';
     })
 
->>>>>>> master
     showEndOfGameDiv(winner)
     window.removeEventListener('mousemove', updatePosition);
     //reset clock
