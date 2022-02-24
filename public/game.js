@@ -9,6 +9,7 @@ export let IN_GAME = false;//flag that says if game is in progress;
 if (getGameId()) gotoGame();
 
 export let gameId;
+let lastTime = null;
 
 socket.on('game_id', (gId) => {
     gameId = gId;
@@ -90,6 +91,42 @@ function changePlayerColor(color, index) {
     players[index - 1]?.changeColor(color);
 }
 
+<<<<<<< HEAD
+=======
+function startGame() {
+    // balls.forEach(ball => {
+    //     ball.centerBall()
+    //     setInterval(() => ball.accelerate(0.5), 2000)
+    // });
+    players.forEach(player => player.positionPlayer())
+    animate();
+}
+
+const animate = () => {
+
+    let now = new Date().getTime();
+    let dt = now - (lastTime ? lastTime : now);
+    lastTime = now;
+
+
+    animationFrameId = window.requestAnimationFrame(animate);
+    c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+
+    c.fillStyle = "#75b8eb";
+    c.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    balls.forEach(ball => ball.update(dt));
+    players.forEach(player => player.update());
+
+    // if (playerGameIndex === 1) {
+    //     balls.forEach(ball => {
+    //         let { x, y } = ball.calculateNextPos();
+    //         socket.emit('update_ball_position', x, y, gameId)
+    //     });
+    // }
+}
+
+>>>>>>> master
 socket.on('update_ball_position', (x, y) => {
     balls.forEach(ball => ball.setPosition(x, y))
 
@@ -99,7 +136,16 @@ socket.on('update_ball_position', (x, y) => {
 socket.on('point', index => incrementPoint(index))
 
 socket.on('end_game', winner => {
+<<<<<<< HEAD
     IN_GAME = false;
+=======
+    console.log(winner);
+
+    players.forEach(player => {
+        player.color = 'black';
+    })
+
+>>>>>>> master
     showEndOfGameDiv(winner)
     window.removeEventListener('mousemove', updatePosition);
     //reset clock

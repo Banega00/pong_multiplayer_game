@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 export const socket = io('https://pong-multiplayer-game-rmt.herokuapp.com', {
     'sync disconnect on unload': true
 });
@@ -52,6 +56,10 @@ const requestGame = (event, opponentName) => {
     const btn = event.target;
 
     //disable btn for 15 sec
+<<<<<<< HEAD
+=======
+    console.log("STATUS:", btn.classList.contains('disabled-play-btn'))
+>>>>>>> master
     if (btn.classList.contains('disabled-play-btn')) return;
     btn.classList.add('disabled-play-btn')
     setInterval(() => btn.classList.remove('disabled-play-btn'), 15000)

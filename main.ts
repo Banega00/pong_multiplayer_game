@@ -22,6 +22,8 @@ import { SocketManager } from './socket-manager';
 
         //turning on server
         let PORT: any = process.env.PORT;
+        console.log("Starting server on port ", PORT, "...");
+        
         if (PORT == null || PORT == "") {
             PORT = 8000;
         }

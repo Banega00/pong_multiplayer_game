@@ -30,7 +30,7 @@ export default class Ball {
     }
 
     calculateNextPos() {
-        let x, y;
+        let speedX, speedY;
         players.forEach(player => {
             this.detectWalls()
             //speedX moze da bude i pozitivan i negativ
@@ -57,16 +57,17 @@ export default class Ball {
             }
         }
         )
-        y = this.y + this.speedY;
-        x = this.x + this.speedX;
+        speedX = this.speedX;
+        speedY = this.speedY;
 
-        return { x, y };
+        return { speedX, speedY };
     }
 
-    update() {
-        const { x, y } = this.calculateNextPos();
-        this.x = x;
-        this.y = y;
+    update(dt) {
+
+        const { speedX, speedY } = this.calculateNextPos();
+        this.x += speedX * (dt / 22);
+        this.y += speedY * (dt / 22);
         this.draw();
     }
 
@@ -78,13 +79,13 @@ export default class Ball {
     detectWalls() {
         if (this.x + this.radius >= CANVAS_WIDTH + 300) {
             //only one player should emit 'point' event
-            if(playerGameIndex===1) emitPoint(1)//player 1 gets the point
+            if (playerGameIndex === 1) emitPoint(1)//player 1 gets the point
             this.centerBall()
             this.speedX = -5;
             this.speedY = -5;
         }
         if (this.x - this.radius <= 0 - 300) {
-            if(playerGameIndex===1) emitPoint(2)//player 2 gets the point
+            if (playerGameIndex === 1) emitPoint(2)//player 2 gets the point
             this.speedX = 5;
             this.speedY = -5;
             this.centerBall()
