@@ -25,7 +25,7 @@ Here is [LINK TO GAME](https://pong-multiplayer-game-rmt.herokuapp.com/login.htm
 6. If opponent player accepts game invitation, both players will gets notification that game is about to start in 5 sec - afterwhich game window will be opened.
   <img src="https://user-images.githubusercontent.com/44339816/134214962-5dbf63d1-4279-4295-8f4f-4b1821c7c9aa.png" width="450">
 
-7. Player how initialized game request can configure game wining points, and game timer, also both players are able to choose their colors
+7. Player who initialized the game request can configure game wining points, and game timer, also both players are able to choose their colors
 8. When both players press ready button - game is started and ball will start to move
    
    <img src="https://user-images.githubusercontent.com/44339816/134215538-f4b9df48-19ed-4e92-ab8b-4270a4c368ba.png" width="450">
@@ -38,7 +38,7 @@ Here is [LINK TO GAME](https://pong-multiplayer-game-rmt.herokuapp.com/login.htm
 # Implementation
 Game follows client-server paradigm.
 
-Client side is iplemented using classic web technologies - **HTML**, **CSS** and **Javascript**. Also, **socket.io-client** library is used to connect client with socket on server side.
+Client side is implemented using classic web technologies - **HTML**, **CSS** and **Javascript**. Also, **socket.io-client** library is used to connect client with socket on server side.
 
 Server is implemented using NodeJS runtime. Most important libraries are: 
 * **express** 
