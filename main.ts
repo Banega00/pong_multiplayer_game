@@ -25,7 +25,7 @@ import { SocketManager } from './socket-manager';
         console.log("Starting server on port ", PORT, "...");
         
         if (PORT == null || PORT == "") {
-            PORT = 8000;
+            PORT = 43123;
         }
         server.listen(PORT, () => {
             console.log(`Server is started at port: ${PORT}`)
