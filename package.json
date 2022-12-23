@@ -4,8 +4,9 @@
   "description": "This project is part of University course called \"Computer Networks\", attended at 5th semester of Undergraduate studies at University of Belgrade, Faculty of Organizational Sciences.",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
     "dev": "ts-node main.ts",
-    "start": "ts-node main.ts",
+    "start": "node ./dist/main.js",
     "web": "ts-node main.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
