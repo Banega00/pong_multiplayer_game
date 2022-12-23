@@ -5,7 +5,7 @@ This is **real-time multiplayer** game, where two players plays against each oth
 
 Game is deployed using **Heroku** platform.
 
-Here is [LINK TO GAME](https://pong-multiplayer-live.herokuapp.com/login.html) - ENJOY!
+Here is [LINK TO GAME](https://pong-multiplayer.onrender.com/login.html) - ENJOY!
 
 
 
