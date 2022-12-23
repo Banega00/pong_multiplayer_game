@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import * as express from 'express';
+import express from 'express';
 import * as mongoose from 'mongoose'
 import { AppController } from './app-controller';
 import * as bodyParser from 'body-parser';
